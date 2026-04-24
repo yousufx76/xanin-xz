@@ -1,6 +1,6 @@
 import nexoraImg from '../assets/nexora.jpg'
 import monolithImg from '../assets/monolith.png'
-import serikaImg from '../assets/serika.png'
+import assassinImg from '../assets/assassion.png';
 import mahediImg from '../assets/mahedi.png'
 import yousufImg from '../assets/YOUSUF.png'
 import finalXaninImg from '../assets/finalXanin.png'
@@ -11,6 +11,7 @@ import Phantomimport from '../assets/Phantom.png'
 import XaninXZimport from '../assets/XaninXZ.png'
 import Zenithimport from '../assets/ZENITH.png'
 import nexorawebImg from '../assets/nexorawab.png'
+import xanSerikaImg from '../assets/xansarika.png';
 
 export const works = [
   {
@@ -41,15 +42,15 @@ export const works = [
   },
   {
     id: 3,
-    title: "XAN SERIKA",
+    title: "Center of Void",
     category: "Web Development",
-    description: "Cinematic personal identity website. Dark red and black aesthetic with anime character design. Playful. Elegant. Dominant.",
-    thumbnail: serikaImg,
-    images: [serikaImg],
-    tools: ["React", "Tailwind CSS", "Framer Motion"],
+    description: "Full-stack squad web app with a dark crimson aesthetic. Public side features flip-card member profiles with Genshin Impact character showcases via Enka.Network API. Private side includes a login-protected savings tracker with role-based access, admin controls, EmailJS notifications, Cloudinary gallery, and Firebase auth — built for a real friend group planning a tour.",
+    thumbnail: assassinImg,
+    images: [assassinImg],
+    tools: ["React", "Vite", "Tailwind CSS", "Firebase", "Cloudinary", "EmailJS", "Framer Motion"],
     timeSpent: "Personal project",
-    year: "2024",
-    link: "https://serika-os.vercel.app",
+    year: "2025",
+    link: "https://center-of-void-main-web.vercel.app/",
     video: null,
   },
   {
@@ -193,6 +194,19 @@ export const works = [
     timeSpent: "9 days",
     year: "2026",
     link: "https://nexora-lab.vercel.app/",
+    video: null,
+  },
+  {
+    id: 15,
+    title: "XAN SERIKA",
+    category: "Graphic Design",
+    description: "Visual identity sheet for Serika — the precision design unit of the XANIN XZ team. Dark editorial layout featuring character reference photos, chibi art, skill annotations, and bold typography. Confidence is not an act. It's her default state.",
+    thumbnail: xanSerikaImg,
+    images: [xanSerikaImg],
+    tools: ["Photoshop", "AI Generation", "Editorial Design"],
+    timeSpent: "Personal project",
+    year: "2025",
+    link: null,
     video: null,
   },
 
