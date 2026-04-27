@@ -92,7 +92,7 @@ export default function Admin() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [form, setForm] = useState({
     title: '', category: 'Graphic Design', description: '',
-    tools: '', timeSpent: '', year: '2026', link: '', video: ''
+    tools: '', timeSpent: '', year: '2026', link: '', video: '', editId: ''
   })
   const [thumbnail, setThumbnail] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -173,15 +173,25 @@ export default function Admin() {
     try {
       let thumbnailUrl = ''
       if (thumbnail) thumbnailUrl = await uploadToCloudinary(thumbnail)
-      await addDoc(collection(db, 'projects'), {
-        title: form.title, category: form.category, description: form.description,
-        tools: form.tools.split(',').map(t => t.trim()),
-        timeSpent: form.timeSpent, year: form.year,
-        link: form.link || '', video: form.video || '',
-        thumbnail: thumbnailUrl, likes: 0, clicks: 0, featured: false,
-        createdAt: serverTimestamp()
-      })
-      setForm({ title: '', category: 'Graphic Design', description: '', tools: '', timeSpent: '', year: '2026', link: '', video: '' })
+      if (form.editId) {
+        await updateDoc(doc(db, 'projects', form.editId), {
+          title: form.title, category: form.category, description: form.description,
+          tools: form.tools.split(',').map(t => t.trim()),
+          timeSpent: form.timeSpent, year: form.year,
+          link: form.link || '', video: form.video || '',
+          ...(thumbnailUrl && { thumbnail: thumbnailUrl }),
+        })
+      } else {
+        await addDoc(collection(db, 'projects'), {
+          title: form.title, category: form.category, description: form.description,
+          tools: form.tools.split(',').map(t => t.trim()),
+          timeSpent: form.timeSpent, year: form.year,
+          link: form.link || '', video: form.video || '',
+          thumbnail: thumbnailUrl, likes: 0, clicks: 0, featured: false,
+          createdAt: serverTimestamp()
+        })
+      }
+      setForm({ title: '', category: 'Graphic Design', description: '', tools: '', timeSpent: '', year: '2026', link: '', video: '', editId: '' })
       setThumbnail(null)
       setPreview(null)
       setShowForm(false)
@@ -591,6 +601,21 @@ export default function Admin() {
                 <div>
                   <p className="text-white font-semibold text-sm">{p.title}</p>
                   <p className="text-white/20 text-xs mt-1">{p.category} · {p.year}</p>
+                  <button
+                    onClick={() => {
+                      setForm({
+                        title: p.title, category: p.category, description: p.description,
+                        tools: p.tools?.join(', ') || '', timeSpent: p.timeSpent || '',
+                        year: p.year, link: p.link || '', video: p.video || '',
+                        editId: p.id
+                      })
+                      setShowForm(true)
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    className="text-[10px] text-[#6c63ff] hover:text-white transition-colors uppercase tracking-widest mt-1"
+                  >
+                    Edit
+                  </button>
                 </div>
                 <div className="flex gap-6 items-center">
                   <div className="text-center">
