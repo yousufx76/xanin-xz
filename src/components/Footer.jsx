@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Mail, MapPin } from 'lucide-react'
 
 const socialLinks = [
@@ -19,6 +20,17 @@ const navLinks = [
 ]
 
 export default function Footer() {
+  const navigate = useNavigate()
+  const [combo, setCombo] = useState('')
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.shiftKey && e.key === 'A') navigate('/admin')
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [navigate])
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -62,13 +74,12 @@ export default function Footer() {
               Get In Touch
             </h3>
 
-            {/* FIXED: Added missing <a> tag */}
             <a 
-              href="mailto:xaninstudio@gmail.com?subject=Project%20Inquiry%20%E2%80%94%20XANIN%20XZ"
+              href="mailto:xaninkaizoxz@gmail.com?subject=Project%20Inquiry%20%E2%80%94%20XANIN%20XZ"
               className="flex items-center gap-2 text-sm text-white/30 hover:text-[#6c63ff] transition-colors w-fit"
             >
               <Mail size={14} />
-              xaninstudio@gmail.com
+              xaninkaizoxz@gmail.com
             </a>
 
             <div className="flex items-center gap-2 text-sm text-white/30">
@@ -78,7 +89,6 @@ export default function Footer() {
 
             <div className="flex flex-wrap gap-3 mt-3">
               {socialLinks.map((social) => (
-                /* FIXED: Added missing <a> tag */
                 <a 
                   key={social.name}
                   href={social.href}
@@ -99,9 +109,14 @@ export default function Footer() {
           <p className="text-xs text-white/20">
             {new Date().getFullYear()} XANIN XZ. All rights reserved.
           </p>
-          <p className="text-xs text-white/20">
-            Designed and built by <span className="text-[#6c63ff]">Yousuf Hasan</span>
-          </p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-white/20">
+              Designed and built by <span
+                className="text-[#6c63ff] cursor-default select-none"
+                onClick={() => navigate('/admin')}
+              >Yousuf Hasan</span>
+            </p>
+          </div>
         </div>
 
       </div>

@@ -10,4 +10,21 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 100vh;
+  background: linear-gradient(to left, #6c63ff10, transparent);
+  pointer-events: none;
+  z-index: 9999;
 }

@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import logoImg from '../assets/Xanin-XZ.png'
+// 1. Added imports
+import { useAuth } from '../context/AuthContext'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { db } from '../firebase'
 
 const navItems = [
   { name: 'Works', path: '/works' },
@@ -13,6 +17,20 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
+
+  // 2. Auth and Pending Count logic
+  const { isAdmin } = useAuth()
+  const [pendingCount, setPendingCount] = useState(0)
+
+  useEffect(() => {
+    if (!isAdmin) return
+    const fetchPending = async () => {
+      const q = query(collection(db, 'messages'), where('status', '==', 'pending'))
+      const snap = await getDocs(q)
+      setPendingCount(snap.size)
+    }
+    fetchPending()
+  }, [isAdmin])
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
@@ -81,6 +99,16 @@ export default function Navbar() {
                 }`} />
               </Link>
             ))}
+
+            {/* 3. Admin Notification Badge */}
+            {isAdmin && pendingCount > 0 && (
+              <Link to="/admin" className="relative">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="absolute -top-1 -right-1 text-[8px] bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center">
+                  {pendingCount}
+                </span>
+              </Link>
+            )}
 
             <Link
               to="/contact"

@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import emailjs from '@emailjs/browser'
-// Combined all icons into one single import to fix the "already declared" error
 import { Mail, MapPin, ExternalLink, Send, CheckCircle, MessageCircle } from 'lucide-react'
+// 1. Added Firebase imports
+import { db } from '../firebase'
+import { collection, addDoc, doc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
 
 // Constants
-const SERVICE_ID = 'service_nla5jfp'
-const TEMPLATE_ID = 'template_6i64iss'
-const PUBLIC_KEY = 'AxasXCaGjgQ6RhvjC'
+const SERVICE_ID = 'service_zqtuxmh'
+const TEMPLATE_ID = 'template_foxumpb'
+const PUBLIC_KEY = 'CRAicbVPmu8YgDtYw'
 
 const socials = [
   { name: 'Instagram', href: 'https://www.instagram.com/yousufhasanxz' },
@@ -46,6 +48,21 @@ export default function Contact() {
         from_email: form.email,
         message: form.message,
       }, PUBLIC_KEY)
+
+      // 2. Added Firebase logic after emailjs success
+      const today = new Date().toISOString().split('T')[0]
+      await addDoc(collection(db, 'messages'), {
+        name: form.name,
+        email: form.email,
+        message: form.message,
+        type: 'form',
+        status: 'pending',
+        createdAt: serverTimestamp()
+      })
+      await setDoc(doc(db, 'analytics', `messages_${today}`), { 
+        count: increment(1), 
+        date: today 
+      }, { merge: true })
 
       setStatus('success')
       setForm({ name: '', email: '', message: '' })
@@ -120,9 +137,21 @@ export default function Contact() {
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 flex flex-col gap-6">
               <h2 className="text-white font-bold text-lg">Contact Info</h2>
 
-              {/* Email Link */}
+              {/* Email Link with 3. onClick Analytics */}
               <a
-                href="mailto:xaninstudio@gmail.com"
+                href="mailto:xaninkaizoxz@gmail.com"
+                onClick={async () => {
+                  const today = new Date().toISOString().split('T')[0]
+                  await addDoc(collection(db, 'messages'), {
+                    type: 'gmail_click', 
+                    status: 'pending', 
+                    createdAt: serverTimestamp()
+                  })
+                  await setDoc(doc(db, 'analytics', `messages_${today}`), { 
+                    count: increment(1), 
+                    date: today 
+                  }, { merge: true })
+                }}
                 className="flex items-center gap-4 group"
               >
                 <div className="w-12 h-12 rounded-2xl bg-[#6c63ff]/10 border border-[#6c63ff]/20 flex items-center justify-center group-hover:bg-[#6c63ff]/20 transition-all duration-300">
@@ -131,16 +160,28 @@ export default function Contact() {
                 <div>
                   <p className="text-[10px] text-white/30 uppercase tracking-widest mb-1">Email</p>
                   <p className="text-sm text-white/70 group-hover:text-white transition-colors">
-                    xaninstudio@gmail.com
+                    xaninkaizoxz@gmail.com
                   </p>
                 </div>
               </a>
 
-              {/* WhatsApp Link */}
+              {/* WhatsApp Link with 4. onClick Analytics */}
               <a
                 href="https://wa.me/8801794078825"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={async () => {
+                  const today = new Date().toISOString().split('T')[0]
+                  await addDoc(collection(db, 'messages'), {
+                    type: 'whatsapp_click', 
+                    status: 'pending', 
+                    createdAt: serverTimestamp()
+                  })
+                  await setDoc(doc(db, 'analytics', `messages_${today}`), { 
+                    count: increment(1), 
+                    date: today 
+                  }, { merge: true })
+                }}
                 className="flex items-center gap-4 group"
               >
                 <div className="w-12 h-12 rounded-2xl bg-[#6c63ff]/10 border border-[#6c63ff]/20 flex items-center justify-center group-hover:bg-[#6c63ff]/20 transition-all duration-300">

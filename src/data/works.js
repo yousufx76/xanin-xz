@@ -21,6 +21,7 @@ export const works = [
     description: "Complete brand identity redesign for Nexora Lab IT Institute. NL lettermark shield logo with orbit navy and electric blue palette.",
     thumbnail: nexoraImg,
     images: [nexoraImg],
+    fullImage: nexoraImg,
     tools: ["Canva", "Illustrator"],
     timeSpent: "Multiple iterations",
     year: "2025",
