@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     sitemap({
       hostname: 'https://xanin-xz.vercel.app',
-      routes: [
+      dynamicRoutes: [
         '/',
         '/about',
         '/works',
