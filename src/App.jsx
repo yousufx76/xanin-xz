@@ -11,6 +11,7 @@ import Admin from './pages/Admin.jsx'
 import CV from './pages/CV.jsx'
 
 
+
 function App() {
   const [loaded, setLoaded] = useState(false)
   const location = useLocation()

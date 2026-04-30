@@ -16,9 +16,6 @@ const categoryIcons = {
   'Video Editing': <Video size={18} />,
 }
 
-// ============================================================
-// ✅ ADDED: CVUploader component (added before export default)
-// ============================================================
 function CVUploader() {
   const [uploading, setUploading] = useState(false)
   const [currentCV, setCurrentCV] = useState('')
@@ -82,7 +79,83 @@ function CVUploader() {
     </div>
   )
 }
-// ============================================================
+
+function CertificateUploader() {
+  const [uploading, setUploading] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [preview, setPreview] = useState(null)
+  const [file, setFile] = useState(null)
+  const [certForm, setCertForm] = useState({
+    title: '', issuer: '', date: '', verifyLink: ''
+  })
+
+  const handleImage = (e) => {
+    const f = e.target.files[0]
+    if (!f) return
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+  }
+
+  const handleUpload = async () => {
+    if (!file || !certForm.title || !certForm.issuer) return
+    setUploading(true)
+    try {
+      const data = new FormData()
+      data.append('file', file)
+      data.append('upload_preset', UPLOAD_PRESET)
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: 'POST', body: data
+      })
+      const json = await res.json()
+      await addDoc(collection(db, 'certificates'), {
+        title: certForm.title,
+        issuer: certForm.issuer,
+        date: certForm.date,
+        verifyLink: certForm.verifyLink || '',
+        image: json.secure_url,
+        createdAt: serverTimestamp()
+      })
+      setCertForm({ title: '', issuer: '', date: '', verifyLink: '' })
+      setFile(null)
+      setPreview(null)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch (err) { console.error(err) }
+    setUploading(false)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div onClick={() => document.getElementById('certInput').click()}
+        className="w-full h-40 rounded-2xl border-2 border-dashed border-white/[0.08] flex items-center justify-center cursor-pointer hover:border-[#6c63ff]/40 transition-all overflow-hidden">
+        {preview
+          ? <img src={preview} className="w-full h-full object-cover" alt="preview" />
+          : <div className="flex flex-col items-center gap-2 text-white/20">
+              <Upload size={24} />
+              <span className="text-xs uppercase tracking-widest">Upload Certificate Image</span>
+            </div>
+        }
+      </div>
+      <input id="certInput" type="file" accept="image/*" onChange={handleImage} className="hidden" />
+      <input value={certForm.title} onChange={e => setCertForm({ ...certForm, title: e.target.value })}
+        placeholder="Certificate Title"
+        className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#6c63ff]/40 transition-all" />
+      <input value={certForm.issuer} onChange={e => setCertForm({ ...certForm, issuer: e.target.value })}
+        placeholder="Issuer (e.g. Anthropic)"
+        className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#6c63ff]/40 transition-all" />
+      <input value={certForm.date} onChange={e => setCertForm({ ...certForm, date: e.target.value })}
+        placeholder="Date (e.g. April 2026)"
+        className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#6c63ff]/40 transition-all" />
+      <input value={certForm.verifyLink} onChange={e => setCertForm({ ...certForm, verifyLink: e.target.value })}
+        placeholder="Verify Link (optional)"
+        className="bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/20 outline-none focus:border-[#6c63ff]/40 transition-all" />
+      <button onClick={handleUpload} disabled={uploading}
+        className="px-5 py-2 bg-[#6c63ff] text-white rounded-xl text-xs font-bold hover:bg-[#5a52e0] transition-all disabled:opacity-50">
+        {uploading ? 'Uploading...' : saved ? '✓ Saved!' : 'Upload Certificate'}
+      </button>
+    </div>
+  )
+}
 
 export default function Admin() {
   const { user, isAdmin, loginWithGoogle, logout } = useAuth()
@@ -535,15 +608,19 @@ export default function Admin() {
           </div>
         </motion.div>
 
-        {/* ============================================================ */}
-        {/* ✅ ADDED: CV Upload section (added before Home Stats Editor) */}
-        {/* ============================================================ */}
+        {/* CV / Resume */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 mb-6">
           <p className="text-white font-bold mb-2">CV / Resume</p>
           <p className="text-white/30 text-xs mb-6">Upload your CV as PDF. Anyone who clicks Download on the CV page will get this file.</p>
           <CVUploader />
         </motion.div>
-        {/* ============================================================ */}
+
+        {/* Certificates */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 mb-6">
+          <p className="text-white font-bold mb-2">Certificates</p>
+          <p className="text-white/30 text-xs mb-6">Upload certificates to showcase on your About page.</p>
+          <CertificateUploader />
+        </motion.div>
 
         {/* Home Stats Editor */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 mb-6">

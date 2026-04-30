@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import emailjs from '@emailjs/browser'
-import { Mail, MapPin, ExternalLink, Send, CheckCircle, MessageCircle } from 'lucide-react'
-// 1. Added Firebase imports
+import { Mail, MapPin, ExternalLink, Send, CheckCircle, MessageCircle, Phone } from 'lucide-react'
 import { db } from '../firebase'
 import { collection, addDoc, doc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
+
 
 // Constants
 const SERVICE_ID = 'service_zqtuxmh'
@@ -49,7 +49,20 @@ export default function Contact() {
         message: form.message,
       }, PUBLIC_KEY)
 
-      // 2. Added Firebase logic after emailjs success
+      // ==========================================
+      // START: NEW DISCORD NOTIFICATION LOGIC
+      // ==========================================
+      await fetch(import.meta.env.VITE_DISCORD_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `📬 **New Message on XANIN XZ!**\n👤 **Name:** ${form.name}\n📧 **Email:** ${form.email}\n💬 **Message:** ${form.message}`
+        })
+      })
+      // ==========================================
+      // END: NEW DISCORD NOTIFICATION LOGIC
+      // ==========================================
+
       const today = new Date().toISOString().split('T')[0]
       await addDoc(collection(db, 'messages'), {
         name: form.name,
@@ -59,15 +72,15 @@ export default function Contact() {
         status: 'pending',
         createdAt: serverTimestamp()
       })
-      await setDoc(doc(db, 'analytics', `messages_${today}`), { 
-        count: increment(1), 
-        date: today 
+      await setDoc(doc(db, 'analytics', `messages_${today}`), {
+        count: increment(1),
+        date: today
       }, { merge: true })
 
       setStatus('success')
       setForm({ name: '', email: '', message: '' })
     } catch (err) {
-      console.error("EmailJS Error:", err)
+      console.error("Error sending message:", err)
       setStatus('error')
     }
   }
@@ -137,19 +150,18 @@ export default function Contact() {
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 flex flex-col gap-6">
               <h2 className="text-white font-bold text-lg">Contact Info</h2>
 
-              {/* Email Link with 3. onClick Analytics */}
               <a
                 href="mailto:xaninkaizoxz@gmail.com"
                 onClick={async () => {
                   const today = new Date().toISOString().split('T')[0]
                   await addDoc(collection(db, 'messages'), {
-                    type: 'gmail_click', 
-                    status: 'pending', 
+                    type: 'gmail_click',
+                    status: 'pending',
                     createdAt: serverTimestamp()
                   })
-                  await setDoc(doc(db, 'analytics', `messages_${today}`), { 
-                    count: increment(1), 
-                    date: today 
+                  await setDoc(doc(db, 'analytics', `messages_${today}`), {
+                    count: increment(1),
+                    date: today
                   }, { merge: true })
                 }}
                 className="flex items-center gap-4 group"
@@ -165,21 +177,20 @@ export default function Contact() {
                 </div>
               </a>
 
-              {/* WhatsApp Link with 4. onClick Analytics */}
               <a
-                href="https://wa.me/8801794078825"
+                href="https://wa.me/8801352192471"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={async () => {
                   const today = new Date().toISOString().split('T')[0]
                   await addDoc(collection(db, 'messages'), {
-                    type: 'whatsapp_click', 
-                    status: 'pending', 
+                    type: 'whatsapp_click',
+                    status: 'pending',
                     createdAt: serverTimestamp()
                   })
-                  await setDoc(doc(db, 'analytics', `messages_${today}`), { 
-                    count: increment(1), 
-                    date: today 
+                  await setDoc(doc(db, 'analytics', `messages_${today}`), {
+                    count: increment(1),
+                    date: today
                   }, { merge: true })
                 }}
                 className="flex items-center gap-4 group"
@@ -190,7 +201,34 @@ export default function Contact() {
                 <div>
                   <p className="text-[10px] text-white/30 uppercase tracking-widest mb-1">WhatsApp</p>
                   <p className="text-sm text-white/70 group-hover:text-white transition-colors">
-                    +880 1794-078825
+                    +880 1352-192471
+                  </p>
+                </div>
+              </a>
+              {/* Phone Link with Analytics */}
+              <a
+                href="tel:+8801352192471"
+                onClick={async () => {
+                  const today = new Date().toISOString().split('T')[0]
+                  await addDoc(collection(db, 'messages'), {
+                    type: 'phone_click',
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                  })
+                  await setDoc(doc(db, 'analytics', `messages_${today}`), {
+                    count: increment(1),
+                    date: today
+                  }, { merge: true })
+                }}
+                className="flex items-center gap-4 group"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[#6c63ff]/10 border border-[#6c63ff]/20 flex items-center justify-center group-hover:bg-[#6c63ff]/20 transition-all duration-300">
+                  <Phone size={18} className="text-[#6c63ff]" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-white/30 uppercase tracking-widest mb-1">Phone</p>
+                  <p className="text-sm text-white/70 group-hover:text-white transition-colors">
+                    +880 1352-192471
                   </p>
                 </div>
               </a>

@@ -73,7 +73,6 @@ function WorkDetail({ work, onClose }) {
   const [showFullImage, setShowFullImage] = useState(false)
 
   useEffect(() => {
-    // Prevent scrolling when modal is open
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = 'unset' }
   }, [])
@@ -86,7 +85,6 @@ function WorkDetail({ work, onClose }) {
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col md:flex-row"
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-6 right-6 z-10 w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/30 transition-all bg-black/20"
@@ -94,7 +92,6 @@ function WorkDetail({ work, onClose }) {
           <X size={18} />
         </button>
 
-        {/* Left - Media Section */}
         <motion.div
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -129,7 +126,6 @@ function WorkDetail({ work, onClose }) {
           ) : null}
         </motion.div>
 
-        {/* Right - Info Section */}
         <motion.div
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -201,7 +197,6 @@ function WorkDetail({ work, onClose }) {
         </motion.div>
       </motion.div>
 
-      {/* Full Image Viewer */}
       <AnimatePresence>
         {showFullImage && work.fullImage && (
           <motion.div
@@ -246,6 +241,15 @@ export default function Works() {
     const fetchWorks = async () => {
       const snap = await getDocs(collection(db, 'projects'))
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      
+      // ==========================================
+      // START: ADDED SORTING BY CREATEDAT
+      // ==========================================
+      data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+      // ==========================================
+      // END: ADDED SORTING BY CREATEDAT
+      // ==========================================
+      
       setWorks(data)
     }
     fetchWorks()

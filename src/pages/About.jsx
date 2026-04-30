@@ -1,6 +1,9 @@
-import { motion } from 'framer-motion'
-import { Mail, MapPin, ExternalLink, Download, FileText } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mail, MapPin, ExternalLink, Download, FileText, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { db } from '../firebase'
+import { collection, getDocs } from 'firebase/firestore'
 import mainImg from '../assets/mainimage.png'
 
 const skills = [
@@ -84,6 +87,18 @@ const fadeUp = {
 }
 
 export default function About() {
+  const [certs, setCerts] = useState([])
+  const [activeCert, setActiveCert] = useState(null)
+
+  useEffect(() => {
+    const fetchCerts = async () => {
+      const snap = await getDocs(collection(db, 'certificates'))
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      setCerts(data)
+    }
+    fetchCerts()
+  }, [])
+
   return (
     <main className="min-h-screen bg-[#030303] pt-32 pb-20 px-6">
       <div className="max-w-6xl mx-auto">
@@ -292,6 +307,88 @@ export default function About() {
             ))}
           </div>
         </motion.div>
+
+        {/* Certificates */}
+        {certs.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-28"
+          >
+            <div className="flex items-center gap-3 mb-12">
+              <span className="w-8 h-[2px] bg-[#6c63ff]"></span>
+              <span className="text-xs tracking-widest text-[#6c63ff] uppercase">Certificates</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {certs.map((cert, i) => (
+                <motion.div
+                  key={cert.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  onClick={() => setActiveCert(cert)}
+                  className="cursor-pointer bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-[#6c63ff]/30 hover:bg-[#6c63ff]/5 transition-all duration-300 group"
+                >
+                  <div className="h-40 overflow-hidden">
+                    <img src={cert.image} alt={cert.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="p-4">
+                    <p className="text-white font-semibold text-sm mb-1">{cert.title}</p>
+                    <p className="text-[#6c63ff] text-xs uppercase tracking-widest">{cert.issuer}</p>
+                    <p className="text-white/20 text-xs mt-1">{cert.date}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Certificate Lightbox */}
+        <AnimatePresence>
+          {activeCert && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveCert(null)}
+              className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-[#0d0d0d] border border-white/[0.08] rounded-3xl overflow-hidden max-w-2xl w-full"
+              >
+                <img src={activeCert.image} alt={activeCert.title} className="w-full object-contain max-h-[60vh]" />
+                <div className="p-6 flex items-start justify-between">
+                  <div>
+                    <p className="text-white font-bold text-lg mb-1">{activeCert.title}</p>
+                    <p className="text-[#6c63ff] text-xs uppercase tracking-widest">{activeCert.issuer}</p>
+                    <p className="text-white/20 text-xs mt-1">{activeCert.date}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {activeCert.verifyLink && (
+                      <a href={activeCert.verifyLink} target="_blank" rel="noopener noreferrer"
+                        className="px-4 py-2 bg-[#6c63ff] text-white rounded-xl text-xs font-bold hover:bg-[#5a52e0] transition-all">
+                        Verify
+                      </a>
+                    )}
+                    <button onClick={() => setActiveCert(null)}
+                      className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Bottom CTA */}
         <motion.div
