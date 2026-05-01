@@ -52,11 +52,13 @@ export default function Contact() {
       // ==========================================
       // START: NEW DISCORD NOTIFICATION LOGIC
       // ==========================================
-      await fetch(import.meta.env.VITE_DISCORD_WEBHOOK, {
+      await fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: `📬 **New Message on XANIN XZ!**\n👤 **Name:** ${form.name}\n📧 **Email:** ${form.email}\n💬 **Message:** ${form.message}`
+          name: form.name,
+          email: form.email,
+          message: form.message
         })
       })
       // ==========================================
