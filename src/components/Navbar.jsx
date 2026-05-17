@@ -25,9 +25,13 @@ export default function Navbar() {
   useEffect(() => {
     if (!isAdmin) return
     const fetchPending = async () => {
-      const q = query(collection(db, 'messages'), where('status', '==', 'pending'))
-      const snap = await getDocs(q)
-      setPendingCount(snap.size)
+      try {
+        const q = query(collection(db, 'messages'), where('status', '==', 'pending'))
+        const snap = await getDocs(q)
+        setPendingCount(snap.size)
+      } catch (err) {
+        // silently fail if messages collection doesn't exist yet
+      }
     }
     fetchPending()
   }, [isAdmin])

@@ -5,7 +5,7 @@ import { Circle, ArrowRight, Zap, MessageSquare, RefreshCw, Star, Film, Paintbru
 import { useVisitorCount } from '../hooks/useVisitorCount'
 import { useEffect, useState } from 'react'
 import { db } from '../firebase'
-import { collection, getDocs, getDoc, doc } from 'firebase/firestore'
+import { collection, getDocs, getDoc, doc, query, where, orderBy, limit } from 'firebase/firestore'
 import WorkCard from '../components/WorkCard'
 
 function ElegantShape({ className, delay = 0, width = 400, height = 100, rotate = 0, gradient = "from-white/[0.08]" }) {
@@ -192,6 +192,7 @@ export default function Home() {
   const [featuredWorks, setFeaturedWorks] = useState([])
   const [selectedService, setSelectedService] = useState(null)
   const [selectedTrust, setSelectedTrust] = useState(null)
+  const [reviews, setReviews] = useState([])
   const [stats, setStats] = useState([
     { value: '50+', label: 'Projects Completed' },
     { value: '20+', label: 'Happy Clients' },
@@ -200,21 +201,47 @@ export default function Home() {
 
   useEffect(() => {
     const fetchFeatured = async () => {
-      const snap = await getDocs(collection(db, 'projects'))
-      const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      const [featSnap, reviewsSnap, clientsSnap, projectsSnap, homeStatsDoc] = await Promise.all([
+        getDocs(collection(db, 'projects')),
+        getDocs(collection(db, 'reviews')),
+        getDocs(collection(db, 'clients')),
+        getDocs(collection(db, 'projects')),
+        getDoc(doc(db, 'stats', 'homeStats')),
+      ])
+
+      // Featured works
+      const all = featSnap.docs.map(d => ({ id: d.id, ...d.data() }))
       const featured = all.filter(p => p.featured)
       setFeaturedWorks(featured.slice(0, 3))
 
-      const homeStatsDoc = await getDoc(doc(db, 'stats', 'homeStats'))
-      if (homeStatsDoc.exists()) {
-        const d = homeStatsDoc.data()
-        setStats([
-          { value: d.projects, label: 'Projects Completed' },
-          { value: d.clients, label: 'Happy Clients' },
-          { value: d.experience, label: 'Years Experience' },
-        ])
-      }
+      // Reviews — pinned only for homepage
+      const reviewsData = reviewsSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(r => r.hidden !== true && r.pinned === true)
+        .sort((a, b) => (b.rating - a.rating))
+        .slice(0, 6)
+      setReviews(reviewsData)
+
+      // Dynamic stats
+      const labClients = clientsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      const labProjects = projectsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+      const happyCount = labClients.filter(c => c.happyClient).length
+      const completedCount = labProjects.filter(p => p.status === "Completed" || p.delivered).length
+      const startDate = new Date("2023-03-15")
+      const yearsExact = (new Date() - startDate) / (1000 * 60 * 60 * 24 * 365.25)
+      const yearsDisplay = `${Math.floor(yearsExact)}+`
+
+      const manual = homeStatsDoc.exists() ? homeStatsDoc.data() : {}
+      const manualProjects = parseInt(manual.projects) || 0
+      const manualClients = parseInt(manual.clients) || 0
+
+      setStats([
+        { value: `${manualProjects + completedCount}+`, label: "Projects Completed" },
+        { value: `${manualClients + happyCount}+`, label: "Happy Clients" },
+        { value: yearsDisplay, label: "Years Experience" },
+      ])
     }
+
     fetchFeatured()
   }, [])
 
@@ -383,6 +410,97 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Client Reviews */}
+      {reviews.length > 0 && (
+        <section className="py-24 px-6 border-t border-white/[0.06]">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.6 }}
+              className="mb-14">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-8 h-[2px] bg-[#6c63ff]"></span>
+                <span className="text-xs tracking-widest text-[#6c63ff] uppercase">Client Reviews</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white">
+                What clients say~
+              </h2>
+              <p className="text-white/30 text-sm mt-2 max-w-md">
+                Real reviews from real projects delivered through XANIN LAB.
+              </p>
+            </motion.div>
+
+            {/* Average rating */}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="flex gap-1">
+                {[1,2,3,4,5].map(s => {
+                  const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+                  return (
+                    <span key={s} className="text-xl"
+                      style={{ color: s <= Math.round(avg) ? "#6c63ff" : "#1f2937" }}>★</span>
+                  )
+                })}
+              </div>
+              <p className="text-white font-bold text-lg">
+                {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
+              </p>
+              <p className="text-white/30 text-sm">
+                from {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+
+            {/* Review cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.map((review, i) => (
+                <motion.div key={review.id}
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 hover:border-[#6c63ff]/30 transition-all duration-300">
+                  {/* Stars */}
+                  <div className="flex gap-1 mb-4">
+                    {[1,2,3,4,5].map(s => (
+                      <span key={s} className="text-sm"
+                        style={{ color: s <= review.rating ? "#6c63ff" : "#1f2937" }}>★</span>
+                    ))}
+                  </div>
+                  {/* Review text */}
+                  <p className="text-white/50 text-sm leading-relaxed mb-5 italic">
+                    "{review.review}"
+                  </p>
+                  {/* Client info */}
+                  <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+                    <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
+                      style={{ background: "rgba(99,102,241,0.3)" }}>
+                      {review.clientPfp
+                        ? <img src={review.clientPfp} alt="" className="w-full h-full object-cover" />
+                        : review.clientName?.[0]?.toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{review.clientName}</p>
+                      <p className="text-white/20 text-xs">{review.projectTitle}</p>
+                    </div>
+                    <span className="text-[#6c63ff] text-[10px] font-mono tracking-widest flex-shrink-0">
+                      VERIFIED ✓
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* See All Reviews button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-center mt-10">
+              <Link to="/reviews"
+                className="inline-flex items-center gap-2 px-6 py-3 border border-white/[0.08] text-white/40 rounded-full text-sm hover:border-[#6c63ff]/50 hover:text-[#6c63ff] transition-all duration-300">
+                See All Reviews <ArrowRight size={14} />
+              </Link>
+            </motion.div>
           </div>
         </section>
       )}

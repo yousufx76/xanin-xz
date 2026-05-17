@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 
 const categories = ['All', 'Graphic Design', 'Web Development', 'Video Editing']
+const projectTypes = ['All Projects', 'Client Work', 'Showcase']
 
 function getYouTubeId(url) {
   const match = url.match(/(?:shorts\/|v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
@@ -234,30 +235,45 @@ function WorkDetail({ work, onClose }) {
 
 export default function Works() {
   const [active, setActive] = useState('All')
+  const [typeFilter, setTypeFilter] = useState('All Projects')
   const [selected, setSelected] = useState(null)
   const [works, setWorks] = useState([])
 
   useEffect(() => {
     const fetchWorks = async () => {
       const snap = await getDocs(collection(db, 'projects'))
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      
-      // ==========================================
-      // START: ADDED SORTING BY CREATEDAT
-      // ==========================================
-      data.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-      // ==========================================
-      // END: ADDED SORTING BY CREATEDAT
-      // ==========================================
-      
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(p =>
+          p.portfolioOnly === true ||
+          p.status === "Completed" ||
+          p.delivered === true
+        )
+        .map(p => ({
+          ...p,
+          category: p.category || p.type || "Other",
+          timeSpent: p.timeSpent || p.timeline || "",
+          year: p.year || (p.createdAt ? new Date(p.createdAt).getFullYear().toString() : ""),
+          link: p.link || p.linkUrl || null,
+          isClientWork: !p.portfolioOnly && (p.status === "Completed" || p.delivered),
+        }))
+        .sort((a, b) => {
+          const dateA = a.completedAt || a.createdAt || ""
+          const dateB = b.completedAt || b.createdAt || ""
+          return dateB.localeCompare(dateA)
+        })
       setWorks(data)
     }
     fetchWorks()
   }, [])
 
-  const filtered = active === 'All'
-    ? works
-    : works.filter((w) => w.category === active)
+  const filtered = works
+    .filter(w => {
+      if (typeFilter === 'Client Work') return w.isClientWork
+      if (typeFilter === 'Showcase') return w.portfolioOnly
+      return true
+    })
+    .filter(w => active === 'All' || w.category === active)
 
   const container = {
     hidden: { opacity: 0 },
@@ -288,6 +304,20 @@ export default function Works() {
           </p>
         </motion.div>
 
+        {/* Project type filter */}
+        <div className="flex flex-wrap gap-3 mb-5">
+          {projectTypes.map(type => (
+            <button key={type} onClick={() => setTypeFilter(type)}
+              className={`text-[10px] uppercase tracking-widest font-bold px-5 py-2.5 rounded-full border transition-all duration-300 flex items-center gap-2 ${
+                typeFilter === type
+                  ? 'bg-[#6c63ff] border-[#6c63ff] text-white shadow-lg shadow-[#6c63ff]/20'
+                  : 'border-white/[0.08] text-white/30 hover:border-[#6c63ff] hover:text-[#6c63ff]'
+              }`}>
+              {type === 'Client Work' ? '✓' : type === 'Showcase' ? '◈' : '⊞'} {type}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-wrap gap-3 mb-12">
           {categories.map((cat) => (
             <button
@@ -316,7 +346,19 @@ export default function Works() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {filtered.map((work) => (
-              <motion.div key={work.id} variants={item}>
+              <motion.div key={work.id} variants={item} className="relative">
+                {work.isClientWork && (
+                  <div className="absolute top-3 left-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
+                    style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80" }}>
+                    ✓ CLIENT WORK
+                  </div>
+                )}
+                {work.portfolioOnly && (
+                  <div className="absolute top-3 left-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
+                    style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#818cf8" }}>
+                    ◈ SHOWCASE
+                  </div>
+                )}
                 <WorkCard work={work} onClick={setSelected} />
               </motion.div>
             ))}

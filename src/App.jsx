@@ -9,6 +9,7 @@ import Works from './pages/Works'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin.jsx'
 import CV from './pages/CV.jsx'
+import Reviews from './pages/Reviews'
 
 
 
@@ -34,6 +35,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/cv" element={<CV />} />
+            <Route path="/reviews" element={<Reviews />} />
           </Routes>
           <Footer />
         </>
