@@ -351,18 +351,17 @@ export default function Works() {
           >
             {filtered.map((work) => (
               <motion.div key={work.id} variants={item} className="relative">
-                {work.isClientWork && (
+                {work.isClientWork ? (
                   <div className="absolute top-3 left-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
                     style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80" }}>
                     ✓ CLIENT WORK
                   </div>
-                )}
-                {work.portfolioOnly && (
+                ) : work.portfolioOnly ? (
                   <div className="absolute top-3 left-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
                     style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#818cf8" }}>
                     ◈ SHOWCASE
                   </div>
-                )}
+                ) : null}
                 <WorkCard work={work} onClick={setSelected} />
               </motion.div>
             ))}
