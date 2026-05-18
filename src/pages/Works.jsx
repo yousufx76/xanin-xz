@@ -258,9 +258,13 @@ export default function Works() {
           isClientWork: !p.portfolioOnly && (p.status === "Completed" || p.delivered),
         }))
         .sort((a, b) => {
-          const dateA = a.completedAt || a.createdAt || ""
-          const dateB = b.completedAt || b.createdAt || ""
-          return dateB.localeCompare(dateA)
+          const toMs = (d) => {
+            if (!d) return 0
+            if (typeof d === "string") return new Date(d).getTime()
+            if (d.seconds) return d.seconds * 1000
+            return 0
+          }
+          return toMs(b.completedAt || b.createdAt) - toMs(a.completedAt || a.createdAt)
         })
       setWorks(data)
     }
