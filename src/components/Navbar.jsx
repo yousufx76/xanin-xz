@@ -9,6 +9,8 @@ import { db } from '../firebase'
 
 const navItems = [
   { name: 'Works', path: '/works' },
+  { name: 'Services', path: '/services' },
+  { name: 'Events', path: '/events' },
   { name: 'About', path: '/about' },
   { name: 'Contact', path: '/contact' },
 ]

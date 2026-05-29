@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLocation } from 'react-router-dom'
 import WorkCard from '../components/WorkCard'
 import { db } from '../firebase'
 import { 
@@ -80,124 +81,135 @@ function WorkDetail({ work, onClose }) {
 
   return (
     <>
+      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col md:flex-row"
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
+        onClick={onClose}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 z-10 w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/30 transition-all bg-black/20"
-        >
-          <X size={18} />
-        </button>
-
+        {/* Card */}
         <motion.div
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="w-full md:w-1/2 h-1/2 md:h-full flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-white/[0.06] relative"
+          initial={{ opacity: 0, scale: 0.94, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.94, y: 16 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-2xl bg-[#0e0e16] border border-white/[0.08] shadow-2xl"
+          onClick={e => e.stopPropagation()}
         >
-          {work.video ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${getYouTubeId(work.video)}`}
-              title={work.title}
-              className="w-full max-w-lg aspect-video rounded-2xl border border-white/[0.08]"
-              allowFullScreen
-            />
-          ) : work.thumbnail ? (
-            <>
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-all bg-black/30"
+          >
+            <X size={15} />
+          </button>
+
+          {/* Image / Video */}
+          <div className="w-full bg-white/[0.02] border-b border-white/[0.06] flex items-center justify-center">
+            {work.video ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${getYouTubeId(work.video)}`}
+                title={work.title}
+                className="w-full aspect-video"
+                allowFullScreen
+              />
+            ) : work.thumbnail ? (
               <img
                 src={work.thumbnail}
                 alt={work.title}
-                className="w-full max-w-lg rounded-2xl border border-white/[0.08] object-cover shadow-2xl"
+                className="w-full h-auto object-contain"
               />
+            ) : null}
+          </div>
+
+          {/* Info */}
+          <div className="p-6 flex flex-col gap-5">
+
+            {/* Category + Year */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs px-3 py-1 rounded-full bg-[#6c63ff]/20 text-[#6c63ff] border border-[#6c63ff]/30">
+                {work.category}
+              </span>
+              <span className="text-xs text-white/20">{work.year}</span>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+              {work.title}
+            </h2>
+
+            {/* Description */}
+            <p className="text-white/40 text-sm leading-relaxed">
+              {work.description}
+            </p>
+
+            {/* Meta */}
+            <div className="flex flex-col gap-3 py-4 border-t border-b border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <Calendar size={13} className="text-[#6c63ff]" />
+                <span className="text-xs text-white/30 uppercase tracking-widest">Year</span>
+                <span className="text-xs text-white ml-auto">{work.year}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Clock size={13} className="text-[#6c63ff]" />
+                <span className="text-xs text-white/30 uppercase tracking-widest">Time Spent</span>
+                <span className="text-xs text-white ml-auto">{work.timeSpent}</span>
+              </div>
+              {work.tools && work.tools.length > 0 && (
+                <div className="flex items-start gap-3">
+                  <Wrench size={13} className="text-[#6c63ff] mt-0.5" />
+                  <span className="text-xs text-white/30 uppercase tracking-widest">Tools</span>
+                  <div className="ml-auto flex flex-wrap gap-1.5 justify-end">
+                    {work.tools.map((tool) => (
+                      <span key={tool} className="text-[10px] px-2 py-1 rounded-md bg-white/[0.05] text-white/40">
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <LikeButton work={work} />
+              {work.link && (
+                <a
+                  href={work.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#6c63ff] text-white rounded-full text-sm font-medium hover:bg-[#5a52e0] transition-all active:scale-95"
+                >
+                  Visit Live <ExternalLink size={13} />
+                </a>
+              )}
+              {work.video && (
+                <a
+                  href={work.video}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-white/[0.08] text-white/40 rounded-full text-sm font-medium hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95"
+                >
+                  Watch Video <ExternalLink size={13} />
+                </a>
+              )}
               {work.fullImage && (
                 <button
                   onClick={() => setShowFullImage(true)}
-                  className="absolute bottom-10 right-10 flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.1] text-white/50 hover:text-white hover:border-[#6c63ff]/50 transition-all text-xs tracking-widest uppercase"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-white/[0.08] text-white/40 rounded-full text-sm font-medium hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95 ml-auto"
                 >
-                  <Maximize2 size={12} />
-                  Full Design
-                  <ChevronRight size={12} />
+                  <Maximize2 size={13} /> Full Design
                 </button>
               )}
-            </>
-          ) : null}
-        </motion.div>
-
-        <motion.div
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.15 }}
-          className="w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center px-8 md:px-12 gap-6 overflow-y-auto py-8"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xs px-3 py-1 rounded-full bg-[#6c63ff]/20 text-[#6c63ff] border border-[#6c63ff]/30 w-fit">
-              {work.category}
-            </span>
-            <span className="text-xs text-white/20">{work.year}</span>
-          </div>
-
-          <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
-            {work.title}
-          </h1>
-
-          <p className="text-white/40 leading-relaxed text-sm max-w-md">
-            {work.description}
-          </p>
-
-          <div className="flex flex-col gap-4 py-4 border-t border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <Calendar size={14} className="text-[#6c63ff]" />
-              <span className="text-xs text-white/30 uppercase tracking-widest">Year</span>
-              <span className="text-sm text-white ml-auto">{work.year}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Clock size={14} className="text-[#6c63ff]" />
-              <span className="text-xs text-white/30 uppercase tracking-widest">Time</span>
-              <span className="text-sm text-white ml-auto">{work.timeSpent}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <Wrench size={14} className="text-[#6c63ff] mt-1" />
-              <span className="text-xs text-white/30 uppercase tracking-widest">Tools</span>
-              <div className="ml-auto flex flex-wrap gap-2 justify-end">
-                {work.tools && work.tools.map((tool) => (
-                  <span key={tool} className="text-[10px] px-2 py-1 rounded-md bg-white/[0.05] text-white/30">
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-3 flex-wrap">
-            <LikeButton work={work} />
-            {work.link && (
-              <a
-                href={work.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-[#6c63ff] text-white rounded-full text-sm font-medium hover:bg-[#5a52e0] transition-all active:scale-95"
-              >
-                Visit Live <ExternalLink size={14} />
-              </a>
-            )}
-            {work.video && (
-              <a
-                href={work.video}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 border border-white/[0.08] text-white/40 rounded-full text-sm font-medium hover:border-[#6c63ff] hover:text-[#6c63ff] transition-all active:scale-95"
-              >
-                Watch Video <ExternalLink size={14} />
-              </a>
-            )}
           </div>
         </motion.div>
       </motion.div>
 
+      {/* Full image overlay */}
       <AnimatePresence>
         {showFullImage && work.fullImage && (
           <motion.div
@@ -205,18 +217,13 @@ function WorkDetail({ work, onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[300] bg-black/98 flex items-center justify-center p-6"
+            onClick={() => setShowFullImage(false)}
           >
             <button
               onClick={() => setShowFullImage(false)}
               className="absolute top-6 left-6 flex items-center gap-2 text-white/40 hover:text-white transition-colors text-xs uppercase tracking-widest"
             >
               <ChevronLeft size={14} /> Back
-            </button>
-            <button
-              onClick={() => setShowFullImage(false)}
-              className="absolute top-6 right-6 w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
-            >
-              <X size={18} />
             </button>
             <motion.img
               initial={{ scale: 0.9, opacity: 0 }}
@@ -225,6 +232,7 @@ function WorkDetail({ work, onClose }) {
               src={work.fullImage}
               alt={work.title}
               className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+              onClick={e => e.stopPropagation()}
             />
           </motion.div>
         )}
@@ -234,13 +242,16 @@ function WorkDetail({ work, onClose }) {
 }
 
 export default function Works() {
+  const location = useLocation()
   const [active, setActive] = useState('All')
   const [typeFilter, setTypeFilter] = useState('All Projects')
   const [selected, setSelected] = useState(null)
   const [works, setWorks] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchWorks = async () => {
+      setIsLoading(true)
       const snap = await getDocs(collection(db, 'projects'))
       const data = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
@@ -267,9 +278,22 @@ export default function Works() {
           return toMs(b.completedAt || b.createdAt) - toMs(a.completedAt || a.createdAt)
         })
       setWorks(data)
+      setIsLoading(false)
     }
     fetchWorks()
   }, [])
+
+  // Auto-open work detail when coming from Home page with openWorkId in state
+  useEffect(() => {
+    if (!isLoading && works.length > 0 && location.state?.openWorkId) {
+      const foundWork = works.find(w => w.id === location.state.openWorkId)
+      if (foundWork) {
+        setSelected(foundWork)
+        // Clear the state from location to prevent re-opening on refresh
+        window.history.replaceState({}, document.title)
+      }
+    }
+  }, [isLoading, works, location.state])
 
   const filtered = works
     .filter(w => {
@@ -338,7 +362,12 @@ export default function Works() {
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-20">
+            <div className="inline-block w-8 h-8 border-2 border-[#6c63ff]/30 border-t-[#6c63ff] rounded-full animate-spin" />
+            <p className="text-white/20 mt-4 text-sm">Loading projects...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20 text-white/20 border border-dashed border-white/[0.06] rounded-3xl">
             No projects found in this category.
           </div>

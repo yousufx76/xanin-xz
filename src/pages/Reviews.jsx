@@ -2,10 +2,100 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { db } from '../firebase'
 import { collection, getDocs } from 'firebase/firestore'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const STAR_COLOR = "#6c63ff"
+
+function ReviewPopup({ review, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = 'unset' }
+  }, [])
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-6"
+      onClick={onClose}
+    >
+      <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        onClick={e => e.stopPropagation()}
+        className="w-full max-w-md rounded-3xl overflow-hidden"
+        style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        {/* Client profile header */}
+        <div className="p-6 pb-4 relative" style={{ background: 'rgba(99,102,241,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <button onClick={onClose}
+            className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"
+            style={{ position: 'absolute' }}>
+            <X size={14} />
+          </button>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-xl font-bold"
+              style={{ background: 'rgba(99,102,241,0.3)', border: '2px solid rgba(99,102,241,0.3)' }}>
+              {review.clientPfp
+                ? <img src={review.clientPfp} alt="" className="w-full h-full object-cover" />
+                : review.clientName?.[0]?.toUpperCase()}
+            </div>
+            <div>
+              <p className="text-white font-bold text-base">{review.clientName}</p>
+              <p className="text-white/40 text-xs mt-0.5">{review.projectTitle}</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-[#6c63ff] text-[10px] font-mono tracking-widest">VERIFIED ✓</span>
+                {review.createdAt && (
+                  <span className="text-white/20 text-[10px]">
+                    · {new Date(review.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Review content */}
+        <div className="p-6">
+          {/* Stars */}
+          <div className="flex gap-1.5 mb-4">
+            {[1,2,3,4,5].map(s => (
+              <span key={s} className="text-2xl" style={{ color: s <= review.rating ? '#6c63ff' : '#1f2937' }}>★</span>
+            ))}
+          </div>
+
+          {/* Review text */}
+          <p className="text-white/70 text-sm leading-relaxed mb-5 italic">"{review.review}"</p>
+
+          {/* Tags */}
+          {review.feedbackTags?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-5">
+              {review.feedbackTags.map(tag => (
+                <span key={tag} className="text-[10px] px-3 py-1 rounded-full text-white/30"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Badges */}
+          <div className="flex gap-2 flex-wrap">
+            {review.pinned && (
+              <span className="text-[10px] font-mono tracking-widest px-2 py-1 rounded-full"
+                style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#6c63ff' }}>
+                📌 FEATURED
+              </span>
+            )}
+            {review.isLegacy && (
+              <span className="text-[10px] font-mono tracking-widest px-2 py-1 rounded-full"
+                style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.3)', color: '#eab308' }}>
+                ⭐ LEGACY
+              </span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
 
 export default function Reviews() {
   const [reviews, setReviews] = useState([])
@@ -13,6 +103,7 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("reviews")
   const [ratingFilter, setRatingFilter] = useState(0)
+  const [selectedReview, setSelectedReview] = useState(null)
 
   useEffect(() => { fetchData() }, [])
 
@@ -188,7 +279,8 @@ export default function Reviews() {
                     <motion.div key={review.id}
                       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.06 }}
-                      className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 hover:border-[#6c63ff]/30 transition-all duration-300 relative">
+                      onClick={() => setSelectedReview(review)}
+                      className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 hover:border-[#6c63ff]/30 transition-all duration-300 relative cursor-pointer">
 
                       {review.pinned && (
                         <div className="absolute top-4 right-4 text-[10px] font-mono tracking-widest px-2 py-0.5 rounded-full"
@@ -303,6 +395,11 @@ export default function Reviews() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Review Popup */}
+      <AnimatePresence>
+        {selectedReview && <ReviewPopup review={selectedReview} onClose={() => setSelectedReview(null)} />}
+      </AnimatePresence>
     </main>
   )
 }

@@ -10,6 +10,12 @@ import Contact from './pages/Contact'
 import Admin from './pages/Admin.jsx'
 import CV from './pages/CV.jsx'
 import Reviews from './pages/Reviews'
+import Events from './pages/Events'
+import Services from './pages/Services'
+import Premade from './pages/Premade'
+import NotFound from './pages/NotFound'
+
+
 
 
 
@@ -36,6 +42,11 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/cv" element={<CV />} />
             <Route path="/reviews" element={<Reviews />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/premade" element={<Premade />} />
+            <Route path="*" element={<NotFound />} />
+
           </Routes>
           <Footer />
         </>

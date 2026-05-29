@@ -5,14 +5,8 @@ import { Mail, MapPin, ExternalLink, Send, CheckCircle, MessageCircle, Phone } f
 import { db } from '../firebase'
 import { collection, addDoc, doc, setDoc, increment, serverTimestamp } from 'firebase/firestore'
 
-
-// Constants
-const SERVICE_ID = 'service_zqtuxmh'
-const TEMPLATE_ID = 'template_foxumpb'
-const PUBLIC_KEY = 'CRAicbVPmu8YgDtYw'
-
 const socials = [
-  { name: 'Instagram', href: 'https://www.instagram.com/yousufhasanxz' },
+  { name: 'Instagram', href: 'https://www.instagram.com/xaninxz' },
   { name: 'YouTube', href: 'https://youtube.com/@xaninxz' },
   { name: 'GitHub', href: 'https://github.com/yousufx76' },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/xanin-kaizo-graphics-designer/' },
@@ -43,16 +37,24 @@ export default function Contact() {
 
     setStatus('sending')
     try {
-      await emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+      // Send notification to you (receiver account)
+      await emailjs.send('service_v7ap7co', 'template_j9i3hka', {
         from_name: form.name,
         from_email: form.email,
         message: form.message,
-      }, PUBLIC_KEY)
+      }, 'ngLYvzqsOKrHHYt1h')
+
+      // Send confirmation to client (sender account)
+      emailjs.send('service_nla5jfp', 'template_6i64iss', {
+        from_name: form.name,
+        from_email: form.email,
+        message: form.message,
+      }, 'AxasXCaGjgQ6RhvjC').catch(() => {})
 
       // ==========================================
-      // START: NEW DISCORD NOTIFICATION LOGIC
+      // START: DISCORD WEBHOOK NOTIFICATION VIA PHP
       // ==========================================
-      await fetch('/api/notify', {
+      await fetch('https://xaninxz.com/api/notify.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -62,7 +64,7 @@ export default function Contact() {
         })
       })
       // ==========================================
-      // END: NEW DISCORD NOTIFICATION LOGIC
+      // END: DISCORD WEBHOOK NOTIFICATION VIA PHP
       // ==========================================
 
       const today = new Date().toISOString().split('T')[0]
@@ -153,7 +155,7 @@ export default function Contact() {
               <h2 className="text-white font-bold text-lg">Contact Info</h2>
 
               <a
-                href="mailto:xaninkaizoxz@gmail.com"
+                href="mailto:xaninstudio@gmail.com"
                 onClick={async () => {
                   const today = new Date().toISOString().split('T')[0]
                   await addDoc(collection(db, 'messages'), {
@@ -174,7 +176,7 @@ export default function Contact() {
                 <div>
                   <p className="text-[10px] text-white/30 uppercase tracking-widest mb-1">Email</p>
                   <p className="text-sm text-white/70 group-hover:text-white transition-colors">
-                    xaninkaizoxz@gmail.com
+                    xaninstudio@gmail.com
                   </p>
                 </div>
               </a>

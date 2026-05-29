@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Mail, MapPin } from 'lucide-react'
 
 const socialLinks = [
-  { name: 'WhatsApp', href: 'https://wa.me/8801794078825' },
+  { name: 'WhatsApp', href: 'https://wa.me/8801352192471' },
   { name: 'Instagram', href: 'https://www.instagram.com/yousufhasanxz' },
   { name: 'YouTube', href: 'https://youtube.com/@xaninxz' },
   { name: 'GitHub', href: 'https://github.com/yousufx76' },
@@ -75,11 +75,11 @@ export default function Footer() {
             </h3>
 
             <a 
-              href="mailto:xaninkaizoxz@gmail.com?subject=Project%20Inquiry%20%E2%80%94%20XANIN%20XZ"
+              href="mailto:xaninstudio@gmail.com?subject=Project%20Inquiry%20%E2%80%94%20XANIN%20XZ"
               className="flex items-center gap-2 text-sm text-white/30 hover:text-[#6c63ff] transition-colors w-fit"
             >
               <Mail size={14} />
-              xaninkaizoxz@gmail.com
+              xaninstudio@gmail.com
             </a>
 
             <div className="flex items-center gap-2 text-sm text-white/30">

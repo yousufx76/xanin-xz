@@ -1,19 +1,96 @@
 import mainImg from '../assets/mainimage.png'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Circle, ArrowRight, Zap, MessageSquare, RefreshCw, Star, Film, Paintbrush, Code2, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { useVisitorCount } from '../hooks/useVisitorCount'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { db } from '../firebase'
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit } from 'firebase/firestore'
 import WorkCard from '../components/WorkCard'
 
-function ElegantShape({ className, delay = 0, width = 400, height = 100, rotate = 0, gradient = "from-white/[0.08]" }) {
+// ==================== ANIMATION COMPONENTS ====================
+
+function CursorGlow() {
+  const [pos, setPos] = useState({ x: -400, y: -400 })
+
+  useEffect(() => {
+    const move = (e) => setPos({ x: e.clientX, y: e.clientY })
+    window.addEventListener('mousemove', move)
+    return () => window.removeEventListener('mousemove', move)
+  }, [])
+
+  return (
+    <div
+      className="fixed pointer-events-none z-[998] rounded-full transition-transform duration-100"
+      style={{
+        width: 400,
+        height: 400,
+        left: pos.x - 200,
+        top: pos.y - 200,
+        background: 'radial-gradient(circle, rgba(108,99,255,0.06) 0%, transparent 70%)',
+      }}
+    />
+  )
+}
+
+function Marquee() {
+  const skills = [
+    'Video Editing', '·', 'Graphic Design', '·', 'Web Development', '·',
+    'React', '·', 'Framer Motion', '·', 'Firebase', '·',
+    'Color Grading', '·', 'Brand Identity', '·', 'Tailwind CSS', '·',
+    'Digital Art', '·', 'Motion Design', '·', 'UI/UX', '·',
+  ]
+  const doubled = [...skills, ...skills]
+
+  return (
+    <div className="overflow-hidden py-6 border-t border-white/[0.06]">
+      <motion.div
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+        className="flex items-center gap-8 whitespace-nowrap w-max"
+      >
+        {doubled.map((skill, i) => (
+          <span key={i} className={`text-xs tracking-widest uppercase ${skill === '·' ? 'text-[#6c63ff]' : 'text-white/20'}`}>
+            {skill}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
+function TiltCard({ children, onClick }) {
+  const ref = useRef(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+
+  const handleMouseMove = (e) => {
+    const rect = ref.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12
+    setTilt({ x, y })
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+      onClick={onClick}
+      animate={{ rotateY: tilt.x, rotateX: tilt.y }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      style={{ transformStyle: 'preserve-3d', cursor: 'pointer' }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+function ElegantShape({ className, delay = 0, width = 400, height = 100, rotate = 0, gradient = "from-white/[0.08]", offsetX = 0, offsetY = 0, scrollOffset = 0 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -150, rotate: rotate - 15 }}
-      animate={{ opacity: 1, y: 0, rotate: rotate }}
-      transition={{ duration: 2.4, delay, ease: [0.23, 0.86, 0.39, 0.96], opacity: { duration: 1.2 } }}
+      animate={{ opacity: 1, y: offsetY + scrollOffset, rotate: rotate, x: offsetX }}
+      transition={{ duration: 2.4, delay, ease: [0.23, 0.86, 0.39, 0.96], opacity: { duration: 1.2 }, x: { type: 'spring', stiffness: 40, damping: 20 }, y: { type: 'spring', stiffness: 40, damping: 20 } }}
       className={`absolute ${className}`}
     >
       <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} style={{ width, height }} className="relative">
@@ -27,6 +104,8 @@ const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i) => ({ opacity: 1, y: 0, transition: { duration: 1, delay: 0.5 + i * 0.2, ease: [0.25, 0.4, 0.25, 1] } }),
 }
+
+// ==================== DATA ====================
 
 const services = [
   {
@@ -102,6 +181,8 @@ const trustPoints = [
     ]
   },
 ]
+
+// ==================== MODAL COMPONENTS ====================
 
 function ServiceModal({ service, onClose }) {
   useEffect(() => {
@@ -187,17 +268,94 @@ function TrustModal({ point, onClose }) {
   )
 }
 
+function ReviewPopup({ review, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = 'unset' }
+  }, [])
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-6"
+      onClick={onClose}
+    >
+      <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        onClick={e => e.stopPropagation()}
+        className="bg-[#0d0d0d] border border-white/[0.08] rounded-3xl p-8 max-w-md w-full relative"
+      >
+        <button onClick={onClose}
+          className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
+          <X size={14} />
+        </button>
+        <div className="flex gap-1.5 mb-5">
+          {[1,2,3,4,5].map(s => (
+            <span key={s} className="text-2xl" style={{ color: s <= review.rating ? "#6c63ff" : "#1f2937" }}>★</span>
+          ))}
+        </div>
+        <p className="text-white/70 text-base leading-relaxed mb-6 italic">"{review.review}"</p>
+        {review.projectTitle && (
+          <div className="rounded-xl px-4 py-3 mb-5"
+            style={{ background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.15)' }}>
+            <p className="text-[10px] uppercase tracking-widest text-white/20 mb-1">Project</p>
+            <p className="text-sm text-white/60">{review.projectTitle}</p>
+          </div>
+        )}
+        <div className="flex items-center gap-3 pt-5 border-t border-white/[0.06]">
+          <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-white text-sm font-bold"
+            style={{ background: 'rgba(99,102,241,0.3)' }}>
+            {review.clientPfp
+              ? <img src={review.clientPfp} alt="" className="w-full h-full object-cover" />
+              : review.clientName?.[0]?.toUpperCase()}
+          </div>
+          <div>
+            <p className="text-white text-sm font-semibold">{review.clientName}</p>
+            <p className="text-[#6c63ff] text-[10px] font-mono tracking-widest">VERIFIED ✓</p>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ==================== MAIN HOME COMPONENT ====================
+
 export default function Home() {
   useVisitorCount()
+  const navigate = useNavigate()
   const [featuredWorks, setFeaturedWorks] = useState([])
   const [selectedService, setSelectedService] = useState(null)
   const [selectedTrust, setSelectedTrust] = useState(null)
+  const [selectedReview, setSelectedReview] = useState(null)
   const [reviews, setReviews] = useState([])
+  
+  // Mouse tracking state
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [scrollY, setScrollY] = useState(0)
+  
   const [stats, setStats] = useState([
     { value: '50+', label: 'Projects Completed' },
     { value: '20+', label: 'Happy Clients' },
     { value: '3+', label: 'Years Experience' },
   ])
+
+  // Mouse move tracking
+  useEffect(() => {
+    const handleMouse = (e) => {
+      setMousePos({
+        x: (e.clientX / window.innerWidth - 0.5),
+        y: (e.clientY / window.innerHeight - 0.5),
+      })
+    }
+    window.addEventListener('mousemove', handleMouse)
+    return () => window.removeEventListener('mousemove', handleMouse)
+  }, [])
+
+  // Scroll tracking
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -222,7 +380,7 @@ export default function Home() {
         .slice(0, 6)
       setReviews(reviewsData)
 
-      // Dynamic stats
+      // Dynamic stats (unchanged)
       const labClients = clientsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
       const labProjects = projectsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
       const happyCount = labClients.filter(c => c.happyClient).length
@@ -247,16 +405,22 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#030303]">
+      <CursorGlow />
 
       {/* Hero */}
       <section className="relative min-h-screen w-full flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#6c63ff]/[0.05] via-transparent to-rose-500/[0.03] blur-3xl" />
         <div className="absolute inset-0 overflow-hidden">
-          <ElegantShape delay={0.3} width={500} height={120} rotate={12} gradient="from-[#6c63ff]/[0.15]" className="left-[-5%] top-[20%]" />
-          <ElegantShape delay={0.5} width={400} height={100} rotate={-15} gradient="from-violet-500/[0.12]" className="right-[-5%] top-[65%]" />
-          <ElegantShape delay={0.4} width={250} height={70} rotate={-8} gradient="from-[#6c63ff]/[0.10]" className="left-[10%] bottom-[10%]" />
-          <ElegantShape delay={0.6} width={180} height={50} rotate={20} gradient="from-violet-400/[0.12]" className="right-[20%] top-[12%]" />
-          <ElegantShape delay={0.7} width={130} height={35} rotate={-25} gradient="from-indigo-400/[0.10]" className="left-[25%] top-[8%]" />
+          <ElegantShape delay={0.3} width={500} height={120} rotate={12} gradient="from-[#6c63ff]/[0.15]" className="left-[-5%] top-[20%]"
+            offsetX={mousePos.x * 25} offsetY={mousePos.y * 25} scrollOffset={scrollY * 0.15} />
+          <ElegantShape delay={0.5} width={400} height={100} rotate={-15} gradient="from-violet-500/[0.12]" className="right-[-5%] top-[65%]"
+            offsetX={mousePos.x * -20} offsetY={mousePos.y * -20} scrollOffset={scrollY * 0.08} />
+          <ElegantShape delay={0.4} width={250} height={70} rotate={-8} gradient="from-[#6c63ff]/[0.10]" className="left-[10%] bottom-[10%]"
+            offsetX={mousePos.x * 35} offsetY={mousePos.y * 35} scrollOffset={scrollY * 0.2} />
+          <ElegantShape delay={0.6} width={180} height={50} rotate={20} gradient="from-violet-400/[0.12]" className="right-[20%] top-[12%]"
+            offsetX={mousePos.x * -15} offsetY={mousePos.y * -15} scrollOffset={scrollY * 0.12} />
+          <ElegantShape delay={0.7} width={130} height={35} rotate={-25} gradient="from-indigo-400/[0.10]" className="left-[25%] top-[8%]"
+            offsetX={mousePos.x * 30} offsetY={mousePos.y * 30} scrollOffset={scrollY * 0.18} />
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-10 pt-32 pb-20">
@@ -272,7 +436,22 @@ export default function Home() {
                 <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
                   <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">Hi, I'm</span>
                   <br />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#6c63ff] via-white/90 to-violet-300">Yousuf Hasan</span>
+                  <span className="relative inline-block">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#6c63ff] via-white/90 to-violet-300">Yousuf Hasan</span>
+                    <motion.span
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.5) 50%, transparent 60%)',
+                        backgroundSize: '200% 100%',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                      animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                      transition={{ duration: 3, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
+                    >
+                      Yousuf Hasan
+                    </motion.span>
+                  </span>
                 </h1>
               </motion.div>
 
@@ -317,14 +496,8 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/60 pointer-events-none" />
       </section>
 
-      {/* Skills Strip */}
-      <section className="border-t border-white/[0.06] py-6 px-6">
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-16">
-          {['Video Editing', 'Graphic Design', 'Web Development'].map((skill) => (
-            <span key={skill} className="text-xs text-white/20 tracking-widest uppercase">{skill}</span>
-          ))}
-        </div>
-      </section>
+      {/* Marquee Skills Strip */}
+      <Marquee />
 
       {/* What I Do */}
       <section className="py-24 px-6 border-t border-white/[0.06]">
@@ -387,7 +560,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Works */}
+      {/* Featured Works with Tilt Cards */}
       {featuredWorks.length > 0 && (
         <section className="py-24 px-6 border-t border-white/[0.06]">
           <div className="max-w-6xl mx-auto">
@@ -406,7 +579,9 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredWorks.map((work, i) => (
                 <motion.div key={work.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}>
-                  <WorkCard work={work} onClick={() => {}} />
+                  <TiltCard>
+                    <WorkCard work={work} onClick={() => navigate('/works', { state: { openWorkId: work.id } })} />
+                  </TiltCard>
                 </motion.div>
               ))}
             </div>
@@ -453,13 +628,15 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Review cards */}
+            {/* Review cards - clickable */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {reviews.map((review, i) => (
                 <motion.div key={review.id}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
-                  className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 hover:border-[#6c63ff]/30 transition-all duration-300">
+                  className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 hover:border-[#6c63ff]/30 transition-all duration-300 cursor-pointer"
+                  onClick={() => setSelectedReview(review)}
+                >
                   {/* Stars */}
                   <div className="flex gap-1 mb-4">
                     {[1,2,3,4,5].map(s => (
@@ -529,7 +706,9 @@ export default function Home() {
       <AnimatePresence>
         {selectedTrust && <TrustModal point={selectedTrust} onClose={() => setSelectedTrust(null)} />}
       </AnimatePresence>
-
+      <AnimatePresence>
+        {selectedReview && <ReviewPopup review={selectedReview} onClose={() => setSelectedReview(null)} />}
+      </AnimatePresence>
     </main>
   )
 }

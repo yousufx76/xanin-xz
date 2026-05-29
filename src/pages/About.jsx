@@ -29,12 +29,12 @@ const tools = [
 ]
 
 const socials = [
-  { name: 'Instagram', href: 'https://www.instagram.com/yousufhasanxz' },
+  { name: 'Instagram', href: 'https://www.instagram.com/xaninxz?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
   { name: 'YouTube', href: 'https://youtube.com/@xaninxz' },
   { name: 'GitHub', href: 'https://github.com/yousufx76' },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/xanin-kaizo-graphics-designer/' },
-  { name: 'Fiverr', href: 'https://www.fiverr.com/s/gDbq31v' },
-  { name: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61583585307485' },
+  { name: 'Fiverr', href: 'https://www.fiverr.com/xaninx76?source=gig_page' },
+  { name: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61589721403702' },
 ]
 
 const timeline = [
@@ -170,10 +170,10 @@ export default function About() {
                 <MapPin size={14} className="text-[#6c63ff] shrink-0" />
                 Savar, Dhaka, Bangladesh
               </div>
-              <a href="mailto:xaninkaizoxz@gmail.com"
+              <a href="mailto:xaninstudio@gmail.com"
                 className="flex items-center gap-3 text-sm text-white/40 hover:text-[#6c63ff] transition-colors w-fit">
                 <Mail size={14} className="text-[#6c63ff] shrink-0" />
-                xaninkaizoxz@gmail.com
+                xaninstudio@gmail.com
               </a>
             </div>
 

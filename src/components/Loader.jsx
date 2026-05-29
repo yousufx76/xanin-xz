@@ -1,36 +1,123 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+
+const PING_URL = 'https://xanin-xz.vercel.app/logo.png'
+
+async function measureSpeed() {
+  try {
+    const startTime = performance.now()
+    await fetch(PING_URL + '?t=' + Date.now(), { cache: 'no-store' })
+    const duration = performance.now() - startTime
+    // duration in ms — lower = faster
+    // <300ms = fast, 300-800ms = medium, >800ms = slow
+    if (duration < 300) return 'fast'
+    if (duration < 800) return 'medium'
+    return 'slow'
+  } catch {
+    return 'medium'
+  }
+}
+
+function getProgressConfig(speed) {
+  // Returns how fast the progress bar fills (ms per tick)
+  if (speed === 'fast') return { tickMs: 18, maxAutoStop: 95 }
+  if (speed === 'medium') return { tickMs: 35, maxAutoStop: 90 }
+  return { tickMs: 65, maxAutoStop: 85 }
+}
+
+const SPEED_LABELS = {
+  fast: { label: 'Fast Connection', color: '#22c55e' },
+  medium: { label: 'Good Connection', color: '#6366f1' },
+  slow: { label: 'Slow Connection', color: '#f59e0b' },
+}
 
 export default function Loader({ onComplete }) {
   const [show, setShow] = useState(true)
   const [progress, setProgress] = useState(0)
   const [phase, setPhase] = useState(0)
+  const [speed, setSpeed] = useState(null)
+  const [textsComplete, setTextsComplete] = useState(false)
+  const [barComplete, setBarComplete] = useState(false)
+  const progressRef = useRef(0)
+  const intervalRef = useRef(null)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) { clearInterval(interval); return 100 }
-        return prev + 1
-      })
-    }, 28)
+    // measure speed first
+    measureSpeed().then(detectedSpeed => {
+      setSpeed(detectedSpeed)
+      const { tickMs, maxAutoStop } = getProgressConfig(detectedSpeed)
 
+      // Start progress bar
+      intervalRef.current = setInterval(() => {
+        progressRef.current += 1
+        setProgress(progressRef.current)
+
+        // Auto-stop at maxAutoStop — wait for texts to finish
+        if (progressRef.current >= maxAutoStop) {
+          clearInterval(intervalRef.current)
+        }
+
+        if (progressRef.current >= 100) {
+          clearInterval(intervalRef.current)
+          setBarComplete(true)
+        }
+      }, tickMs)
+    })
+
+    // Text phases
     const p1 = setTimeout(() => setPhase(1), 600)
     const p2 = setTimeout(() => setPhase(2), 1400)
     const p3 = setTimeout(() => setPhase(3), 2200)
-
-    const timer = setTimeout(() => {
-      setShow(false)
-      setTimeout(() => onComplete(), 900)
-    }, 3400)
+    const textsDone = setTimeout(() => setTextsComplete(true), 3200)
 
     return () => {
-      clearTimeout(timer)
       clearTimeout(p1)
       clearTimeout(p2)
       clearTimeout(p3)
-      clearInterval(interval)
+      clearTimeout(textsDone)
+      clearInterval(intervalRef.current)
     }
   }, [])
+
+  // Once texts are done, push bar to 100 fast
+  useEffect(() => {
+    if (!textsComplete) return
+    if (progressRef.current >= 100) { setBarComplete(true); return }
+
+    // Fill remaining gap quickly
+    intervalRef.current = setInterval(() => {
+      progressRef.current += 1
+      setProgress(progressRef.current)
+      if (progressRef.current >= 100) {
+        clearInterval(intervalRef.current)
+        setBarComplete(true)
+      }
+    }, 12)
+
+    return () => clearInterval(intervalRef.current)
+  }, [textsComplete])
+
+  // Both done — exit
+  useEffect(() => {
+    if (!barComplete) return
+    const timer = setTimeout(() => {
+      setShow(false)
+      setTimeout(() => onComplete(), 900)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [barComplete])
+
+  const speedInfo = speed ? SPEED_LABELS[speed] : null
+
+  const statusText = progress < 25
+    ? 'Loading assets'
+    : progress < 50
+    ? 'Preparing canvas'
+    : progress < 75
+    ? 'Almost ready'
+    : progress < 100
+    ? 'Finalizing'
+    : 'Welcome'
 
   return (
     <AnimatePresence>
@@ -93,6 +180,30 @@ export default function Loader({ onComplete }) {
             style={{ background: 'linear-gradient(to right, transparent, rgba(108,99,255,0.2), transparent)' }}
           />
 
+          {/* Speed indicator — top right */}
+          <AnimatePresence>
+            {speedInfo && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: 0.5 }}
+                className="absolute top-6 right-14 flex items-center gap-2"
+              >
+                <motion.div
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: speedInfo.color }}
+                />
+                <span className="text-[9px] uppercase tracking-[0.3em] font-mono"
+                  style={{ color: speedInfo.color + '99' }}>
+                  {speedInfo.label}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Main content */}
           <div className="flex flex-col items-center gap-10 relative z-10">
 
@@ -113,7 +224,7 @@ export default function Loader({ onComplete }) {
                 className="w-20 h-20 md:w-28 md:h-28 object-contain relative z-10" />
             </motion.div>
 
-            {/* Brand name — letter by letter */}
+            {/* Brand name */}
             <div className="flex flex-col items-center gap-3">
               <div className="flex items-center gap-[2px] md:gap-1">
                 {'XANIN'.split('').map((letter, i) => (
@@ -126,12 +237,7 @@ export default function Loader({ onComplete }) {
                     {letter}
                   </motion.span>
                 ))}
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.9 }}
-                  className="w-4 md:w-8"
-                />
+                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="w-4 md:w-8" />
                 {'XZ'.split('').map((letter, i) => (
                   <motion.span key={i}
                     initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
@@ -179,21 +285,40 @@ export default function Loader({ onComplete }) {
               </div>
             </div>
 
-            {/* Progress */}
+            {/* Progress section */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="flex flex-col items-center gap-3"
+              className="flex flex-col items-center gap-4 w-48 md:w-72"
             >
+
+              {/* Big progress number */}
+              <div className="flex items-end gap-1">
+                <motion.span
+                  key={progress}
+                  className="text-2xl md:text-3xl font-light tracking-[0.3em]"
+                  style={{
+                    fontFamily: "'Rajdhani', sans-serif",
+                    background: `linear-gradient(135deg, #6c63ff, #a78bfa)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  {String(progress).padStart(3, '0')}
+                </motion.span>
+                <span className="text-white/20 text-sm mb-0.5 tracking-widest" style={{ fontFamily: "'Rajdhani', sans-serif" }}>%</span>
+              </div>
+
               {/* Progress bar */}
-              <div className="relative w-48 md:w-72 h-[1px] bg-white/[0.04] rounded-full overflow-hidden">
+              <div className="relative w-full h-[2px] bg-white/[0.04] rounded-full overflow-hidden">
                 <motion.div
                   className="absolute inset-y-0 left-0 rounded-full"
-                  style={{ background: 'linear-gradient(to right, #6c63ff, #a78bfa)' }}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 2.8, ease: 'easeInOut', delay: 0.5 }}
+                  style={{
+                    width: `${progress}%`,
+                    background: 'linear-gradient(to right, #6c63ff, #a78bfa)',
+                    transition: 'width 0.1s linear',
+                  }}
                 />
                 {/* Shimmer */}
                 <motion.div
@@ -204,18 +329,21 @@ export default function Loader({ onComplete }) {
                 />
               </div>
 
-              {/* Progress number + status */}
-              <div className="flex items-center gap-4">
-                <span className="text-[10px] text-white/15 font-mono tracking-widest">
-                  {String(progress).padStart(3, '0')}%
-                </span>
-                <div className="w-1 h-1 rounded-full bg-[#6c63ff] animate-pulse" />
-                <span className="text-[10px] text-white/15 tracking-widest uppercase font-mono">
-                  {progress < 30 ? 'Loading assets' : progress < 60 ? 'Preparing canvas' : progress < 90 ? 'Almost ready' : 'Welcome'}
-                </span>
-              </div>
-            </motion.div>
+              {/* Status text */}
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={statusText}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-[10px] text-white/15 tracking-widest uppercase font-mono"
+                >
+                  {statusText}
+                </motion.span>
+              </AnimatePresence>
 
+            </motion.div>
           </div>
 
         </motion.div>

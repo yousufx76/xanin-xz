@@ -96,14 +96,14 @@ export default function CV() {
               <p className="text-[#6c63ff] text-sm tracking-widest uppercase mb-6">Creative Director — XANIN XZ</p>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 text-white/40 text-sm"><MapPin size={13} className="text-[#6c63ff]" />Savar, Dhaka, Bangladesh</div>
-                <a href="mailto:xaninkaizoxz@gmail.com" className="flex items-center gap-2 text-white/40 text-sm hover:text-[#6c63ff] transition-colors"><Mail size={13} className="text-[#6c63ff]" />xaninkaizoxz@gmail.com</a>
-                <a href="https://wa.me/8801794078825" className="flex items-center gap-2 text-white/40 text-sm hover:text-[#6c63ff] transition-colors"><MessageCircle size={13} className="text-[#6c63ff]" />+880 1794-078825</a>
-                <a href="https://xanin-xz.vercel.app" className="flex items-center gap-2 text-white/40 text-sm hover:text-[#6c63ff] transition-colors"><Globe size={13} className="text-[#6c63ff]" />xanin-xz.vercel.app</a>
+                <a href="mailto:xaninstudio@gmail.com" className="flex items-center gap-2 text-white/40 text-sm hover:text-[#6c63ff] transition-colors"><Mail size={13} className="text-[#6c63ff]" />xaninstudio@gmail.com</a>
+                <a href="https://wa.me/8801352192471" className="flex items-center gap-2 text-white/40 text-sm hover:text-[#6c63ff] transition-colors"><MessageCircle size={13} className="text-[#6c63ff]" />+880 1352-192471</a>
+                <a href="https://xaninxz.com" className="flex items-center gap-2 text-white/40 text-sm hover:text-[#6c63ff] transition-colors"><Globe size={13} className="text-[#6c63ff]" />xaninxz.com</a>
               </div>
             </div>
             <div className="flex flex-col items-center gap-2 shrink-0">
               <div className="p-3 bg-white rounded-2xl">
-                <QRCodeSVG value="https://xanin-xz.vercel.app" size={90} bgColor="#ffffff" fgColor="#030303" level="H" />
+                <QRCodeSVG value="https://xaninxz.com" size={90} bgColor="#ffffff" fgColor="#030303" level="H" />
               </div>
               <p className="text-white/20 text-[9px] uppercase tracking-widest">Scan Portfolio</p>
             </div>
@@ -158,7 +158,7 @@ export default function CV() {
         {/* Portfolio Link */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }}
           className="text-center">
-          <p className="text-white/20 text-xs">Full portfolio at <a href="https://xanin-xz.vercel.app" className="text-[#6c63ff] hover:text-white transition-colors">xanin-xz.vercel.app</a></p>
+          <p className="text-white/20 text-xs">Full portfolio at <a href="https://xaninxz.com" className="text-[#6c63ff] hover:text-white transition-colors">xaninxz.com</a></p>
         </motion.div>
       </div>
 
@@ -174,13 +174,13 @@ export default function CV() {
               <p style={{ color: '#6c63ff', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 14px 0', fontFamily: 'Arial, sans-serif' }}>Creative Director — XANIN XZ</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>📍 Savar, Dhaka, Bangladesh</p>
-                <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>✉️ xaninkaizoxz@gmail.com</p>
-                <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>💬 +880 1794-078825</p>
-                <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>🌐 xanin-xz.vercel.app</p>
+                <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>✉️ xaninstudio@gmail.com</p>
+                <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>💬 +880 1352-192471</p>
+                <p style={{ margin: 0, fontSize: '10px', color: '#555', fontFamily: 'Arial, sans-serif' }}>🌐 xaninxz.com</p>
               </div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <QRCodeSVG value="https://xanin-xz.vercel.app" size={75} bgColor="#ffffff" fgColor="#111111" level="H" />
+              <QRCodeSVG value="https://xaninxz.com" size={75} bgColor="#ffffff" fgColor="#111111" level="H" />
               <p style={{ fontSize: '7px', color: '#999', marginTop: '4px', letterSpacing: '1px', fontFamily: 'Arial, sans-serif' }}>SCAN PORTFOLIO</p>
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function CV() {
 
           {/* PDF Footer */}
           <div style={{ position: 'absolute', bottom: '10mm', left: '20mm', right: '20mm', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '8px' }}>
-            <p style={{ fontSize: '9px', color: '#999', margin: 0, fontFamily: 'Arial, sans-serif' }}>Full portfolio available at <span style={{ color: '#6c63ff' }}>xanin-xz.vercel.app</span></p>
+            <p style={{ fontSize: '9px', color: '#999', margin: 0, fontFamily: 'Arial, sans-serif' }}>Full portfolio available at <span style={{ color: '#6c63ff' }}>xaninxz.com</span></p>
           </div>
         </div>
       </div>

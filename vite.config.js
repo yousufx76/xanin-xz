@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     sitemap({
-      hostname: 'https://xanin-xz.vercel.app',
+      hostname: 'https://xaninxz.com',
       dynamicRoutes: [
         '/',
         '/about',
