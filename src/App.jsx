@@ -14,7 +14,6 @@ import Events from './pages/Events'
 import Services from './pages/Services'
 import Premade from './pages/Premade'
 import NotFound from './pages/NotFound'
-import XenaChat from './components/XenaChat'
 
 
 
@@ -49,7 +48,6 @@ function App() {
             <Route path="*" element={<NotFound />} />
 
           </Routes>
-          <XenaChat />
           <Footer />
         </>
       )}
