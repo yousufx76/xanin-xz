@@ -197,9 +197,23 @@ export default function XenaChat() {
                 {["View Pricing", "Premade Sites", "Contact Kaizo"].map((label) => (
                   <button
                     key={label}
-                    onClick={() => {
-                      setInput(label);
-                      setTimeout(() => sendMessage(), 100);
+                    onClick={async () => {
+                      const userMsg = { role: "user", content: label };
+                      const updatedMessages = [...messages, userMsg];
+                      setMessages(updatedMessages);
+                      setLoading(true);
+                      try {
+                        const res = await fetch(WORKER_URL, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ messages: updatedMessages }),
+                        });
+                        const data = await res.json();
+                        setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+                      } catch {
+                        setMessages(prev => [...prev, { role: "assistant", content: "Something went wrong. Try again? 😅" }]);
+                      }
+                      setLoading(false);
                     }}
                     className="text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full border border-[#6c63ff]/20 text-[#6c63ff]/60 hover:border-[#6c63ff]/50 hover:text-[#6c63ff] transition-all duration-200"
                   >
