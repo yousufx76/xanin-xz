@@ -3,24 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import WorkCard from '../components/WorkCard'
 import { db } from '../firebase'
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  setDoc, 
-  increment, 
-  onSnapshot 
+import {
+  collection,
+  getDocs,
+  doc,
+  setDoc,
+  increment,
+  onSnapshot
 } from 'firebase/firestore'
-import { 
-  X, 
-  ExternalLink, 
-  Clock, 
-  Wrench, 
-  Calendar, 
-  ChevronRight, 
-  ChevronLeft, 
-  Maximize2, 
-  Heart 
+import {
+  X,
+  ExternalLink,
+  Clock,
+  Wrench,
+  Calendar,
+  ChevronRight,
+  ChevronLeft,
+  Maximize2,
+  Heart
 } from 'lucide-react'
 
 const categories = ['All', 'Graphic Design', 'Web Development', 'Video Editing']
@@ -49,10 +49,10 @@ function LikeButton({ work }) {
     if (liked) return
     const ref = doc(db, 'projects', String(work.id))
     setDoc(ref, { likes: increment(1), title: work.title }, { merge: true })
-    
+
     const today = new Date().toISOString().split('T')[0]
     setDoc(doc(db, 'analytics', `likes_${today}`), { count: increment(1), date: today }, { merge: true })
-    
+
     const likedProjects = JSON.parse(localStorage.getItem('likedProjects') || '[]')
     localStorage.setItem('likedProjects', JSON.stringify([...likedProjects, work.id]))
     setLiked(true)
@@ -60,11 +60,10 @@ function LikeButton({ work }) {
 
   return (
     <button onClick={handleLike}
-      className={`flex items-center gap-2 px-6 py-3 rounded-full border text-sm font-medium transition-all active:scale-95 ${
-        liked
+      className={`flex items-center gap-2 px-6 py-3 rounded-full border text-sm font-medium transition-all active:scale-95 ${liked
           ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
           : 'border-white/[0.08] text-white/40 hover:border-rose-500/40 hover:text-rose-400'
-      }`}>
+        }`}>
       <Heart size={14} fill={liked ? 'currentColor' : 'none'} />
       {likes} {liked ? 'Liked!' : 'Like'}
     </button>
@@ -343,11 +342,10 @@ export default function Works() {
         <div className="flex flex-wrap gap-3 mb-5">
           {projectTypes.map(type => (
             <button key={type} onClick={() => setTypeFilter(type)}
-              className={`text-[10px] uppercase tracking-widest font-bold px-5 py-2.5 rounded-full border transition-all duration-300 flex items-center gap-2 ${
-                typeFilter === type
+              className={`text-[10px] uppercase tracking-widest font-bold px-5 py-2.5 rounded-full border transition-all duration-300 flex items-center gap-2 ${typeFilter === type
                   ? 'bg-[#6c63ff] border-[#6c63ff] text-white shadow-lg shadow-[#6c63ff]/20'
                   : 'border-white/[0.08] text-white/30 hover:border-[#6c63ff] hover:text-[#6c63ff]'
-              }`}>
+                }`}>
               {type === 'Client Work' ? '✓' : type === 'Showcase' ? '◈' : '⊞'} {type}
             </button>
           ))}
@@ -358,11 +356,10 @@ export default function Works() {
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`text-[10px] uppercase tracking-widest font-bold px-5 py-2.5 rounded-full border transition-all duration-300 ${
-                active === cat
+              className={`text-[10px] uppercase tracking-widest font-bold px-5 py-2.5 rounded-full border transition-all duration-300 ${active === cat
                   ? 'bg-[#6c63ff] border-[#6c63ff] text-white shadow-lg shadow-[#6c63ff]/20'
                   : 'border-white/[0.08] text-white/30 hover:border-[#6c63ff] hover:text-[#6c63ff]'
-              }`}
+                }`}
             >
               {cat}
             </button>
@@ -390,11 +387,16 @@ export default function Works() {
                 {work.hidden ? (
                   <div className="relative cursor-pointer" onClick={() => setSelected(work)}>
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl">
-                      <span className="text-2xl">🔒</span>
-                      <span className="text-[10px] text-white/40 uppercase tracking-widest">Client requested privacy</span>
+                      <div className="w-10 h-10 rounded-2xl bg-[#6c63ff]/10 border border-[#6c63ff]/30 flex items-center justify-center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] text-[#6c63ff]/70 uppercase tracking-widest font-bold">Client requested privacy</span>
                     </div>
                     <div className="opacity-40 blur-sm pointer-events-none">
-                      <WorkCard work={work} onClick={() => {}} />
+                      <WorkCard work={work} onClick={() => { }} />
                     </div>
                   </div>
                 ) : (
