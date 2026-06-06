@@ -504,6 +504,14 @@ export default function Admin() {
                       <Star size={10} fill={p.featured ? 'currentColor' : 'none'} />
                       {p.featured ? 'Featured' : 'Feature'}
                     </button>
+                    <button onClick={async () => {
+                      await updateDoc(doc(db, 'projects', p.id), { hidden: !p.hidden })
+                      fetchAll()
+                    }} className={`flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs transition-all ${
+                      p.hidden ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-white/[0.03] border-white/[0.08] text-white/30 hover:border-red-500/30 hover:text-red-400'
+                    }`}>
+                      {p.hidden ? '🔒 Hidden' : 'Hide'}
+                    </button>
                   </div>
                 </motion.div>
               ))}

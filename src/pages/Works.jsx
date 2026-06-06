@@ -267,6 +267,7 @@ export default function Works() {
           year: p.year || (p.createdAt ? new Date(p.createdAt).getFullYear().toString() : ""),
           link: p.link || p.linkUrl || null,
           isClientWork: !p.portfolioOnly && (p.status === "Completed" || p.delivered),
+          hidden: p.hidden || false,
         }))
         .sort((a, b) => {
           const toMs = (d) => {
@@ -287,7 +288,7 @@ export default function Works() {
   useEffect(() => {
     if (!isLoading && works.length > 0 && location.state?.openWorkId) {
       const foundWork = works.find(w => w.id === location.state.openWorkId)
-      if (foundWork) {
+      if (foundWork && !foundWork.hidden) {
         setSelected(foundWork)
         // Clear the state from location to prevent re-opening on refresh
         window.history.replaceState({}, document.title)
@@ -297,9 +298,9 @@ export default function Works() {
 
   const filtered = works
     .filter(w => {
-      if (typeFilter === 'Client Work') return w.isClientWork
-      if (typeFilter === 'Showcase') return w.portfolioOnly
-      return true
+      if (typeFilter === 'Client Work') return w.isClientWork && !w.hidden
+      if (typeFilter === 'Showcase') return w.portfolioOnly && !w.hidden
+      return !w.hidden
     })
     .filter(w => active === 'All' || w.category === active)
 
@@ -380,18 +381,37 @@ export default function Works() {
           >
             {filtered.map((work) => (
               <motion.div key={work.id} variants={item} className="relative">
-                {work.isClientWork ? (
-                  <div className="absolute top-3 right-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
-                    style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80" }}>
-                    ✓ CLIENT WORK
+                {work.hidden ? (
+                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+                    <div className="h-48 relative flex flex-col items-center justify-center gap-3"
+                      style={{ background: 'repeating-linear-gradient(135deg, #0e0e16 0px, #12121e 20px, #0e0e16 40px)' }}>
+                      <span className="text-3xl">🔒</span>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
+                        <span className="text-[11px] text-white/30">The client has requested privacy for this project</span>
+                      </div>
+                    </div>
+                    <div className="p-4 flex flex-col gap-2">
+                      <p className="text-white/20 text-sm font-medium">— Private Project —</p>
+                      <p className="text-white/20 text-xs">{work.category}</p>
+                      <p className="text-white/20 text-xs flex items-center gap-1">🚫 Link not available</p>
+                    </div>
                   </div>
-                ) : work.portfolioOnly ? (
-                  <div className="absolute top-3 right-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
-                    style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#818cf8" }}>
-                    ◈ SHOWCASE
-                  </div>
-                ) : null}
-                <WorkCard work={work} onClick={setSelected} />
+                ) : (
+                  <>
+                    {work.isClientWork ? (
+                      <div className="absolute top-3 right-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
+                        style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80" }}>
+                        ✓ CLIENT WORK
+                      </div>
+                    ) : work.portfolioOnly ? (
+                      <div className="absolute top-3 right-3 z-10 font-mono-lab text-[9px] tracking-widest px-2 py-1 rounded-full"
+                        style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", color: "#818cf8" }}>
+                        ◈ SHOWCASE
+                      </div>
+                    ) : null}
+                    <WorkCard work={work} onClick={setSelected} />
+                  </>
+                )}
               </motion.div>
             ))}
           </motion.div>
