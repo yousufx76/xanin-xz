@@ -120,7 +120,7 @@ function WorkDetail({ work, onClose }) {
               <img
                 src={work.thumbnail}
                 alt={work.title}
-                className="w-full h-auto object-contain"
+                className={`w-full h-auto object-contain ${work.hidden ? 'blur-md' : ''}`}
               />
             ) : null}
           </div>
@@ -177,14 +177,20 @@ function WorkDetail({ work, onClose }) {
             <div className="flex items-center gap-3 flex-wrap">
               <LikeButton work={work} />
               {work.link && (
-                <a
-                  href={work.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 bg-[#6c63ff] text-white rounded-full text-sm font-medium hover:bg-[#5a52e0] transition-all active:scale-95"
-                >
-                  Visit Live <ExternalLink size={13} />
-                </a>
+                work.hidden ? (
+                  <span className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.03] border border-white/[0.08] text-white/20 rounded-full text-sm font-medium cursor-not-allowed">
+                    Visit Live <ExternalLink size={13} />
+                  </span>
+                ) : (
+                  <a
+                    href={work.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#6c63ff] text-white rounded-full text-sm font-medium hover:bg-[#5a52e0] transition-all active:scale-95"
+                  >
+                    Visit Live <ExternalLink size={13} />
+                  </a>
+                )
               )}
               {work.video && (
                 <a
@@ -298,7 +304,7 @@ export default function Works() {
 
   const filtered = works
     .filter(w => {
-      if (typeFilter === 'Client Work') return w.isClientWork && !w.hidden
+      if (typeFilter === 'Client Work') return w.isClientWork
       if (typeFilter === 'Showcase') return w.portfolioOnly && !w.hidden
       return !w.hidden
     })
@@ -382,18 +388,13 @@ export default function Works() {
             {filtered.map((work) => (
               <motion.div key={work.id} variants={item} className="relative">
                 {work.hidden ? (
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-                    <div className="h-48 relative flex flex-col items-center justify-center gap-3"
-                      style={{ background: 'repeating-linear-gradient(135deg, #0e0e16 0px, #12121e 20px, #0e0e16 40px)' }}>
-                      <span className="text-3xl">🔒</span>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
-                        <span className="text-[11px] text-white/30">The client has requested privacy for this project</span>
-                      </div>
+                  <div className="relative cursor-pointer" onClick={() => setSelected(work)}>
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl">
+                      <span className="text-2xl">🔒</span>
+                      <span className="text-[10px] text-white/40 uppercase tracking-widest">Client requested privacy</span>
                     </div>
-                    <div className="p-4 flex flex-col gap-2">
-                      <p className="text-white/20 text-sm font-medium">— Private Project —</p>
-                      <p className="text-white/20 text-xs">{work.category}</p>
-                      <p className="text-white/20 text-xs flex items-center gap-1">🚫 Link not available</p>
+                    <div className="opacity-40 blur-sm pointer-events-none">
+                      <WorkCard work={work} onClick={() => {}} />
                     </div>
                   </div>
                 ) : (
