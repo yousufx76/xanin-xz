@@ -47,7 +47,7 @@ export default function Footer() {
               XANIN <span className="text-[#6c63ff]">XZ</span>
             </h2>
             <p className="text-white/30 text-sm leading-relaxed max-w-xs">
-              Creative professional. Video editor, graphic designer and web developer based in Dhaka, Bangladesh.
+              Web developer and founder of XANIN XZ, based in Dhaka, Bangladesh — with supporting skills in brand design and video editing.
             </p>
           </div>
 

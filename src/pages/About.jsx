@@ -150,14 +150,14 @@ export default function About() {
                 Yousuf Hasan
               </h1>
               <p className="text-[#6c63ff] text-sm tracking-widest uppercase mb-6">
-                Creative Director — XANIN XZ
+              Founder — XANIN XZ
               </p>
             </div>
 
             <div className="flex flex-col gap-4 text-white/40 leading-relaxed text-sm">
               <p className="text-white/60 italic text-base">"Obsessed with quality, driven by self-learning."</p>
               <p>
-                I'm a self-taught creative professional based in Savar, Dhaka. I specialize in high-end video editing, brand identity design, and modern web development.
+                I'm a self-taught web developer based in Savar, Dhaka, building modern websites and digital experiences. I also bring strong supporting skills in brand identity design and video editing.
               </p>
               <p>
                 I build digital experiences for dreamers and doers. My goal is to combine technical precision with artistic flair — bringing a chill yet dedicated energy to every project I touch.

@@ -35,10 +35,10 @@ function CursorGlow() {
 
 function Marquee() {
   const skills = [
-    'Video Editing', '·', 'Graphic Design', '·', 'Web Development', '·',
-    'React', '·', 'Framer Motion', '·', 'Firebase', '·',
-    'Color Grading', '·', 'Brand Identity', '·', 'Tailwind CSS', '·',
-    'Digital Art', '·', 'Motion Design', '·', 'UI/UX', '·',
+    'Web Development', '·', 'React', '·', 'Tailwind CSS', '·',
+    'Firebase', '·', 'UI/UX', '·', 'Framer Motion', '·',
+    'Graphic Design', '·', 'Brand Identity', '·', 'Digital Art', '·',
+    'Video Editing', '·', 'Color Grading', '·', 'Motion Design', '·',
   ]
   const doubled = [...skills, ...skills]
 
@@ -109,11 +109,11 @@ const fadeUp = {
 
 const services = [
   {
-    icon: <Film size={22} />,
-    title: 'Video Editing',
-    desc: 'Cinematic edits with mood, color and story. From short-form to long-form content.',
-    details: 'I specialize in creating cinematic video edits that combine color grading, sound design, and storytelling. Whether it\'s a YouTube video, a short-form reel, or a brand film — every frame is intentional.',
-    tags: ['Color Grading', 'Short-form', 'Long-form', 'Reels', 'CapCut', 'Premiere Pro'],
+    icon: <Code2 size={22} />,
+    title: 'Web Development',
+    desc: 'Clean, fast and modern React websites with smooth animations and real functionality.',
+    details: 'I build modern, responsive websites using React, Tailwind CSS and Framer Motion. From portfolio sites to full-stack web apps with Firebase backend — clean code, smooth experience.',
+    tags: ['React', 'Tailwind CSS', 'Firebase', 'Framer Motion', 'Vite', 'Vercel'],
   },
   {
     icon: <Paintbrush size={22} />,
@@ -123,11 +123,11 @@ const services = [
     tags: ['Logo Design', 'Brand Identity', 'Posters', 'Canva', 'Photoshop', 'Illustrator'],
   },
   {
-    icon: <Code2 size={22} />,
-    title: 'Web Development',
-    desc: 'Clean, fast and modern React websites with smooth animations and real functionality.',
-    details: 'I build modern, responsive websites using React, Tailwind CSS and Framer Motion. From portfolio sites to full-stack web apps with Firebase backend — clean code, smooth experience.',
-    tags: ['React', 'Tailwind CSS', 'Firebase', 'Framer Motion', 'Vite', 'Vercel'],
+    icon: <Film size={22} />,
+    title: 'Video Editing',
+    desc: 'Cinematic edits with mood, color and story. From short-form to long-form content.',
+    details: 'I specialize in creating cinematic video edits that combine color grading, sound design, and storytelling. Whether it\'s a YouTube video, a short-form reel, or a brand film — every frame is intentional.',
+    tags: ['Color Grading', 'Short-form', 'Long-form', 'Reels', 'CapCut', 'Premiere Pro'],
   },
 ]
 
@@ -429,7 +429,7 @@ export default function Home() {
               <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible"
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] w-fit">
                 <Circle className="h-2 w-2 fill-[#6c63ff]" />
-                <span className="text-sm text-white/60 tracking-wide">Creative Professional · Dhaka, BD</span>
+                <span className="text-sm text-white/60 tracking-wide">Web Developer · Founder of XANIN XZ · Dhaka, BD</span>
               </motion.div>
 
               <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible">
@@ -457,7 +457,7 @@ export default function Home() {
 
               <motion.p custom={2} variants={fadeUp} initial="hidden" animate="visible"
                 className="text-base md:text-lg text-white/40 leading-relaxed font-light tracking-wide max-w-md">
-                Video editor, digital artist, graphic designer & web developer. I create visuals that tell stories and move people.
+                Web developer building modern digital experiences — backed by strong skills in brand design and video editing. I create work that tells stories and moves people.
               </motion.p>
 
               <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible" className="flex items-center gap-4 mt-2">
