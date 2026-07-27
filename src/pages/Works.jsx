@@ -285,6 +285,7 @@ export default function Works() {
         })
       setWorks(data)
       setIsLoading(false)
+      document.dispatchEvent(new Event('render-event'))
     }
     fetchWorks()
   }, [])

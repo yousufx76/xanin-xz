@@ -398,6 +398,8 @@ export default function Home() {
         { value: `${manualClients + happyCount}+`, label: "Happy Clients" },
         { value: yearsDisplay, label: "Years Experience" },
       ])
+      console.log('HOME PAGE RENDER EVENT FIRED')
+      document.dispatchEvent(new Event('render-event'))
     }
 
     fetchFeatured()

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import emailjs from '@emailjs/browser'
 import { Mail, MapPin, ExternalLink, Send, CheckCircle, MessageCircle, Phone } from 'lucide-react'
@@ -26,6 +26,10 @@ const fadeUp = {
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [status, setStatus] = useState('idle')
+
+  useEffect(() => {
+    document.dispatchEvent(new Event('render-event'))
+  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })

@@ -95,6 +95,7 @@ export default function Events() {
         console.error(e)
       } finally {
         setLoading(false)
+        document.dispatchEvent(new Event('render-event'))
       }
     }
     fetchEvents()

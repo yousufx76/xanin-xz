@@ -41,6 +41,8 @@ export default function CV() {
         }
       } catch (error) {
         console.error("Error fetching CV URL:", error)
+      } finally {
+        document.dispatchEvent(new Event('render-event'))
       }
     }
     fetchCV()

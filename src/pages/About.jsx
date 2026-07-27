@@ -95,6 +95,7 @@ export default function About() {
       const snap = await getDocs(collection(db, 'certificates'))
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       setCerts(data)
+      document.dispatchEvent(new Event('render-event'))
     }
     fetchCerts()
   }, [])

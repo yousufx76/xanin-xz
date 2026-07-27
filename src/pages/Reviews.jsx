@@ -124,7 +124,10 @@ export default function Reviews() {
         .filter(c => c.happyClient === true)
       setHappyClients(clientsData)
     } catch (err) { console.error(err) }
-    finally { setLoading(false) }
+    finally {
+      setLoading(false)
+      document.dispatchEvent(new Event('render-event'))
+    }
   }
 
   const avgRating = reviews.length > 0
